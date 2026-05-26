@@ -24,6 +24,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api', templeRoutes);
 app.use('/api', chatRoutes);
 
+app.get('/',(req,res)=>
+{
+    res.send("welcome to aichatbot")
+})
+
 // --- AUTOMATIC DATABASE SEEDER ---
 const defaultTempleData = {
   name: "बाबा बासुकीनाथ धाम मंदिर",
