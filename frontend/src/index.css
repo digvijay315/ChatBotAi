@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Rozha+One&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-orange-50/30 text-stone-800 antialiased font-sans transition-colors duration-300;
+  }
+}
+
+/* Glassmorphism card utility */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-card-dark {
+  background: rgba(24, 20, 18, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 120, 12, 0.15);
+}
+
+/* Saffron gradient flow background */
+.saffron-gradient {
+  background: linear-gradient(135deg, #fde0b3 0%, #fa9e42 50%, #f2780c 100%);
+}
+
+.saffron-gradient-dark {
+  background: linear-gradient(135deg, #1f1207 0%, #3d1c03 50%, #150a02 100%);
+}
+
+/* Elegant scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 120, 12, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 120, 12, 0.6);
+}
+
+/* Shimmer animation for typing indicator */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f2780c 25%, #fde0b3 50%, #f2780c 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Pulse animation for bells */
+@keyframes soft-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.bell-pulse {
+  animation: soft-pulse 2s infinite ease-in-out;
+}
+
+/* Float animation for decorative items */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.float-animation {
+  animation: float 4s infinite ease-in-out;
+}
