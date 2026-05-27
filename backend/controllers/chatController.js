@@ -3,13 +3,70 @@ import Session from '../models/Session.js';
 import Message from '../models/Message.js';
 import Temple from '../models/Temple.js';
 
+// --- HAVERSINE FORMULA FOR DISTANCE CALCULATION ---
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+  return parseFloat(distance.toFixed(2)); // Round to 2 decimal places
+}
+
+const verifiedLocalPlaces = [
+  { name: "बाबा बासुकीनाथ मुख्य मंदिर (Baba Basukinath Temple)", lat: 24.3850, lng: 87.2514, category: "temple", query: "Baba+Basukinath+Dham+Mandir+Jarmundi" },
+  { name: "पर्यटन विहार धर्मशाला (Paryatan Vihar Dharamshala)", lat: 24.3835, lng: 87.2505, category: "hotel", query: "Paryatan+Vihar+Basukinath+Jarmundi" },
+  { name: "शिव कृपा होटल (Hotel Shiv Kripa)", lat: 24.3860, lng: 87.2530, category: "hotel", query: "Hotel+Shiv+Kripa+Basukinath+Jarmundi" },
+  { name: "बासुकीनाथ गेस्ट हाउस (Basukinath Guest House)", lat: 24.3828, lng: 87.2482, category: "hotel", query: "Basukinath+Guest+House+Jarmundi" },
+  { name: "पावन बासुकीनाथ आश्रम (Basukinath Ashram)", lat: 24.3880, lng: 87.2490, category: "ashram", query: "Basukinath+Ashram+Jarmundi" },
+  { name: "सामुदायिक स्वास्थ्य केंद्र, जरमुंडी (Community Health Centre, Jarmundi)", lat: 24.3780, lng: 87.2380, category: "hospital", query: "Community+Health+Centre+Jarmundi" },
+  { name: "निशुल्क स्वास्थ्य शिविर (Free Medical Camp near Temple)", lat: 24.3845, lng: 87.2525, category: "hospital", query: "Baba+Basukinath+Dham+Mandir+Jarmundi" },
+  { name: "भारत पेट्रोलियम जरमुंडी (BPCL Petrol Pump Jarmundi)", lat: 24.3765, lng: 87.2340, category: "petrol_pump", query: "BPCL+Petrol+Pump+Jarmundi" },
+  { name: "बासुकीनाथ बस स्टैंड (Basukinath Bus Stand)", lat: 24.3865, lng: 87.2535, category: "bus_stand", query: "Basukinath+Bus+Stand" },
+  { name: "बासुकीनाथ रेलवे स्टेशन (Basukinath Railway Station)", lat: 24.3800, lng: 87.2440, category: "railway_station", query: "Basukinath+Railway+Station" },
+  { name: "भारतीय स्टेट बैंक एटीएम 🏧 (SBI ATM Basukinath)", lat: 24.3855, lng: 87.2520, category: "atm", query: "SBI+ATM+Basukinath" },
+  { name: "एचडीएफसी बैंक एटीएम 🏧 (HDFC Bank ATM Basukinath)", lat: 24.3840, lng: 87.2508, category: "atm", query: "HDFC+Bank+ATM+Basukinath" }
+];
+
 // --- OFF-LINE KEYWORD SEARCH ENGINE (FALLBACK) ---
-function getSimulatedResponse(question, data) {
+function getSimulatedResponse(question, data, latitude, longitude, activePlaces) {
   const q = question.toLowerCase();
   const deity = data.deity;
   const name = data.name;
+  const placesList = activePlaces || verifiedLocalPlaces;
 
   let reply = `प्रणाम भक्तगण! 🙏 मैं ${name} का डिजिटल मार्गदर्शक हूँ। `;
+
+  // 1. Live Amenities / Facilities Search
+  if (q.includes('hotel') || q.includes('dharamshala') || q.includes('stay') || q.includes('rukne') || q.includes('lodg') || 
+      q.includes('hospital') || q.includes('ill') || q.includes('doctor') || q.includes('chikit') || q.includes('dawai') || 
+      q.includes('petrol') || q.includes('pump') || q.includes('fuel') || q.includes('tel') || 
+      q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('train') || q.includes('stand') || 
+      q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise nikalne') ||
+      q.includes('aashram') || q.includes('ashram') || q.includes('camp') || q.includes('shivir') || q.includes('bhandara') || q.includes('langar')) {
+    
+    reply += `यहाँ आपके सबसे पास की जन-सुविधाओं और शिविरों की जानकारी दी गई है। `;
+    if (latitude && longitude) {
+      reply += `आपके लाइव स्थान (Live GPS) के अनुसार दूरी:\n\n`;
+      placesList.forEach(p => {
+        const dist = calculateDistance(latitude, longitude, p.lat, p.lng);
+        const routeLink = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${p.query}`;
+        reply += `📍 **${p.name}**:\n   - **दूरी**: ${dist} किमी दूर\n   - **दिशा-निर्देश**: [Google Maps पर रास्ता देखें](${routeLink})\n\n`;
+      });
+    } else {
+      reply += `मुख्य मंदिर से इन सुविधाओं की दूरी इस प्रकार है (अपने लाइव स्थान से दूरी देखने के लिए कृपया ब्राउज़र में लोकेशन की अनुमति दें):\n\n`;
+      placesList.forEach(p => {
+        const dist = calculateDistance(24.3850, 87.2514, p.lat, p.lng);
+        const routeLink = `https://www.google.com/maps/search/?api=1&query=${p.query}`;
+        reply += `📍 **${p.name}**:\n   - **मंदिर से दूरी**: लगभग ${dist} किमी\n   - **गूगल मैप्स**: [यहाँ खोजें](${routeLink})\n\n`;
+      });
+    }
+    return reply;
+  }
 
   if (q.includes('samay') || q.includes('time') || q.includes('timing') || q.includes('aarti') || q.includes('arti') || q.includes('khulna') || q.includes('kapt') || q.includes('band')) {
     reply += `यहाँ ${deity} के दर्शन और आरती की समय सारिणी दी गई है:\n\n`;
@@ -46,8 +103,14 @@ function getSimulatedResponse(question, data) {
     return reply;
   }
 
-  if (q.includes('contact') || q.includes('phone') || q.includes('helpline') || q.includes('email') || q.includes('address') || q.includes('location') || q.includes('pata') || q.includes('kahan') || q.includes('reach') || q.includes('rasta') || q.includes('route')) {
+  if (q.includes('contact') || q.includes('phone') || q.includes('helpline') || q.includes('email') || q.includes('address') || q.includes('location') || q.includes('pata') || q.includes('kahan') || q.includes('reach') || q.includes('rasta') || q.includes('route') || q.includes('police') || q.includes('medical') || q.includes('emergency')) {
     reply += `मंदिर का पता और संपर्क सूत्र इस प्रकार है:\n\n📍 **स्थान**: ${data.location}\n\n${data.contact}`;
+    if (data.helplines && data.helplines.length > 0) {
+      reply += `\n\n🚨 **आपातकालीन हेल्पलाइन नंबर (Emergency Helplines)**:\n`;
+      data.helplines.forEach(h => {
+        reply += `- **${h.name}**: ${h.number}${h.description ? ` (${h.description})` : ''}\n`;
+      });
+    }
     return reply;
   }
 
@@ -153,7 +216,7 @@ export const getSessionMessages = async (req, res) => {
 
 // 5. Post message & Get Chatbot response
 export const postMessage = async (req, res) => {
-  const { message, sessionId } = req.body;
+  const { message, sessionId, latitude, longitude } = req.body;
 
   try {
     // 1. Verify session ownership
@@ -166,6 +229,28 @@ export const postMessage = async (req, res) => {
     const data = await Temple.findOne();
     if (!data) {
       return res.status(404).json({ error: 'Temple details not loaded' });
+    }
+
+    // Build the dynamic merged list of places (static + database-backed temporary camps)
+    const activeLocalPlaces = [...verifiedLocalPlaces];
+    if (data.temporaryCamps && data.temporaryCamps.length > 0) {
+      data.temporaryCamps.forEach(camp => {
+        let categoryEmoji = '📍';
+        if (camp.category === 'stay') categoryEmoji = '🏨';
+        else if (camp.category === 'medical') categoryEmoji = '🏥';
+        else if (camp.category === 'food') categoryEmoji = '🍱';
+        else if (camp.category === 'transport') categoryEmoji = '🚌';
+        else if (camp.category === 'atm') categoryEmoji = '🏧';
+
+        activeLocalPlaces.push({
+          name: `${camp.name} ${categoryEmoji} (${camp.category === 'stay' ? 'अस्थायी आवास' : camp.category === 'medical' ? 'अस्थायी चिकित्सा शिविर' : camp.category === 'food' ? 'अस्थायी भोजन/लंगर शिविर' : camp.category === 'atm' ? 'एटीएम/बैंक' : 'अस्थायी परिवहन सेवा'}) - ${camp.description}`,
+          lat: camp.lat,
+          lng: camp.lng,
+          category: camp.category,
+          query: `${camp.lat},${camp.lng}`,
+          description: camp.description
+        });
+      });
     }
 
     // 3. Save User Message in DB
@@ -184,11 +269,49 @@ export const postMessage = async (req, res) => {
 
     if (!apiKey) {
       // 🔸 Fallback simulated offline search engine
-      reply = getSimulatedResponse(message, data);
+      reply = getSimulatedResponse(message, data, latitude, longitude, activeLocalPlaces);
       await new Promise(resolve => setTimeout(resolve, 800));
     } else {
       // 🔸 Call live Gemini API with context RAG with robust fallback chain
       const genAI = new GoogleGenerativeAI(apiKey);
+
+      let locationContext = "";
+      if (latitude && longitude) {
+        const distFromTemple = calculateDistance(latitude, longitude, 24.3850, 87.2514);
+        locationContext = `
+Devotee's LIVE GPS COORDINATES are available: Latitude ${latitude}, Longitude ${longitude}.
+The devotee is currently approximately ${distFromTemple} km away from the main Baba Basukinath Temple.
+
+Here are the exact calculated straight-line (GPS) distances from the devotee to important local static amenities and database-saved temporary camps around the temple. You MUST use these exact distance values to answer their queries:
+${activeLocalPlaces.map(p => {
+  const dist = calculateDistance(latitude, longitude, p.lat, p.lng);
+  const mapsLink = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${p.query}`;
+  return `- **${p.name}**: ${dist} km away from user's current position. Dynamic Route Link: [गूगल मैप्स पर मार्ग देखें](${mapsLink})`;
+}).join('\n')}
+
+Crucial Instructions for Pujari Ji:
+1. Check the devotee's distance from the main temple:
+   - If they are FAR AWAY from the temple (e.g. more than 10 km away): Do NOT call the hotels "nearby to their current location" as 500+ km is not nearby. Instead, politely explain: "चूंकि आप अभी मुख्य मंदिर से लगभग ${distFromTemple} किमी दूर हैं, इसलिए मैं आपको **बाबा बासुकीनाथ मुख्य मंदिर धाम के आसपास स्थित** ठहरने/सुविधाओं/अस्थायी शिविरों की जानकारी दे रहा हूँ ताकि जब आप यहाँ दर्शन के लिए पधारें तो आपको कोई असुविधा न हो। आप अपने वर्तमान स्थान से सीधे वहाँ पहुँचने का मार्ग (Navigation Route) भी देख सकते हैं:"
+   - If they are CLOSE to the temple (e.g. less than 10 km away): Warmly state that they are very close to the holy shrine and show them the nearby options directly: "आप अभी मुख्य मंदिर धाम के अत्यंत समीप (केवल ${distFromTemple} किमी दूर) हैं। यहाँ आपके आसपास स्थित सुविधाएं व सक्रिय अस्थायी शिविर दिए गए हैं:"
+2. Explicitly mention that these calculated distances are straight-line GPS distances (हवाई दूरी) and the actual road driving distance on Google Maps may be slightly longer depending on the highway routes.
+3. Always provide the clickable Markdown route link format: [गूगल मैप्स पर मार्ग देखें](url) for the user to navigate in real-time.
+`;
+      } else {
+        locationContext = `
+Devotee's live GPS coordinates are NOT available (denied or delayed).
+Here are the standard approximate distances from Baba Basukinath Temple (temple coordinates: 24.3850, 87.2514) to important local static amenities and database-saved temporary camps:
+${activeLocalPlaces.map(p => {
+  const distFromTemple = calculateDistance(24.3850, 87.2514, p.lat, p.lng);
+  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${p.query}`;
+  return `- **${p.name}**: ~${distFromTemple} km from Temple. Maps Search Link: [गूगल मैप्स पर स्थान खोजें](${mapsLink})`;
+}).join('\n')}
+
+Missing location instructions for Pujari Ji:
+- Gently let the user know that since their live GPS location is not shared, you are showing approximate distances measured from the temple itself.
+- Inform them that they can get their exact distance and live route navigation by enabling browser location permissions in the chat.
+- Always provide the search link [गूगल मैप्स पर स्थान खोजें](url) for the facilities so they can easily search for them.
+`;
+      }
 
       const context = `
 You are the official, highly respectful digital guide or head priest (Pujari Ji) of the temple "${data.name}".
@@ -206,15 +329,21 @@ ${data.rules.map((r, i) => `  * ${i+1}. ${r}`).join('\n')}
 ${data.festivals.map(f => `  * ${f.name} (${f.date}): ${f.description}`).join('\n')}
 - Donations: ${data.donations}
 - Contact Info: ${data.contact}
+- Emergency Helplines & Assistance Numbers:
+${data.helplines?.map(h => `  * ${h.name}: ${h.number} ${h.description ? `(${h.description})` : ''}`).join('\n') || 'None'}
 - Additional Dynamic Sections:
 ${data.customSections?.map(cs => `  * ${cs.title}: ${cs.content}`).join('\n') || 'None'}
 
+Nearby Amenities & Geolocation Context (Static + Temporary Camps):
+${locationContext}
+
 Instructions:
 1. Always respond in a very polite, gentle, and respectful spiritual tone using greetings like "जय श्री राम!", "प्रणाम भक्तगण!" or "जय श्री कृष्णा!".
-2. You must strictly answer questions based ONLY on the provided temple facts.
-3. If a question is asked that is NOT in the temple data (e.g., general politics, math, cooking, or other unrelated topics), politely refuse to answer, stating that you can only guide them regarding the temple and its activities.
-4. Format your responses beautifully using Markdown (bold text, bullet points, headers) for rich presentation.
+2. You must answer questions based ONLY on the provided temple facts and the provided Nearby Amenities & Geolocation Context (if they ask about hotels, ashrams, hospitals, petrol pumps, bus stands, railway stations, food camps, temporary bhandaras, medical shivirs, etc.). Answering these location queries using the provided location details is fully authorized.
+3. If a question is asked that is NOT in the temple data or nearby amenities (e.g., general politics, math, cooking, or other completely unrelated topics), politely refuse to answer, stating that you can only guide them regarding the temple, its activities, and local visitor amenities.
+4. Format your responses beautifully using Markdown (bold text, bullet points, headers, and click links) for rich presentation.
 5. Answer in the language the user asked in (e.g. Hinglish, Hindi, or English).
+6. यदि भक्त का स्वचालित जीपीएस (GPS) लोकेशन किसी ब्राउज़र/सिस्टम एरर के कारण उपलब्ध नहीं हो पाता, लेकिन वे अपने संदेश में अपने वर्तमान स्थान या शहर का नाम लिखते हैं (जैसे: "मैं अभी दुमका में हूँ, पास के होटल बताओ" या "मैं देवघर में हूँ, पेट्रोल पंप दिखाओ"), तो आप बुद्धिमत्ता से उस स्थान को उनका वर्तमान स्थान मान लें और वहाँ से मंदिर व नजदीकी धर्मशालाओं की दूरी और मार्ग समझाते हुए अत्यंत स्नेह से उत्तर दें।
 `;
 
       let fullPrompt = `${context}\n\n`;
@@ -250,7 +379,8 @@ Instructions:
       }
 
       if (!success) {
-        throw lastError || new Error("All generative models in the fallback chain failed.");
+        console.warn("⚠️ All live Gemini models failed due to rate-limit/leaked API key. Falling back to simulated offline response...");
+        reply = getSimulatedResponse(message, data, latitude, longitude);
       }
     }
 

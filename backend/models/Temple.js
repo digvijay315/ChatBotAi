@@ -20,6 +20,18 @@ const TempleSchema = new mongoose.Schema({
   customSections: [{
     title: { type: String, required: true },
     content: { type: String, required: true }
+  }],
+  temporaryCamps: [{
+    name: { type: String, required: true },
+    category: { type: String, required: true }, // e.g. "stay", "medical", "food", "transport"
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true },
+    description: { type: String, required: true }
+  }],
+  helplines: [{
+    name: { type: String, required: true },
+    number: { type: String, required: true },
+    description: { type: String }
   }]
 }, { timestamps: true });
 

@@ -26,5 +26,12 @@ export const templeUpdateSchema = Joi.object({
       title: Joi.string().required().messages({ 'any.required': 'अनुभाग का शीर्षक अनिवार्य है।' }),
       content: Joi.string().required().messages({ 'any.required': 'अनुभाग की सामग्री अनिवार्य है।' })
     }).unknown(true)
+  ).optional(),
+  helplines: Joi.array().items(
+    Joi.object({
+      name: Joi.string().required().messages({ 'any.required': 'हेल्पलाइन का नाम अनिवार्य है।' }),
+      number: Joi.string().required().messages({ 'any.required': 'हेल्पलाइन नंबर अनिवार्य है।' }),
+      description: Joi.string().allow('').optional()
+    }).unknown(true)
   ).optional()
 }).unknown(true);

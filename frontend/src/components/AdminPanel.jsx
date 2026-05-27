@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Save, Plus, Trash2, RotateCcw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { t } from '../utils/translations';
 import api from '../utils/api';
+import OLC from 'open-location-code';
+import Swal from 'sweetalert2';
 
 export default function AdminPanel({ 
   templeData, 
@@ -21,7 +23,9 @@ export default function AdminPanel({
     festivals: [],
     donations: '',
     contact: '',
-    customSections: []
+    customSections: [],
+    temporaryCamps: [],
+    helplines: []
   });
   
   const [newTiming, setNewTiming] = useState({ name: '', time: '' });
@@ -29,6 +33,9 @@ export default function AdminPanel({
   const [newFestival, setNewFestival] = useState({ name: '', date: '', description: '' });
   const [newSectionTitle, setNewSectionTitle] = useState('');
   const [newSectionContent, setNewSectionContent] = useState('');
+  const [newCamp, setNewCamp] = useState({ name: '', category: 'stay', lat: '', lng: '', description: '' });
+  const [newHelpline, setNewHelpline] = useState({ name: '', number: '', description: '' });
+  const [plusCodeInput, setPlusCodeInput] = useState('');
   
   const [notification, setNotification] = useState({ type: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -38,10 +45,29 @@ export default function AdminPanel({
     if (templeData) {
       setFormData({
         ...templeData,
-        customSections: templeData.customSections || []
+        customSections: templeData.customSections || [],
+        temporaryCamps: templeData.temporaryCamps || [],
+        helplines: templeData.helplines || []
       });
     }
   }, [templeData]);
+
+  const getSwalOptions = (title, text, icon) => ({
+    title,
+    text,
+    icon,
+    background: isDarkMode ? '#1c1917' : '#ffffff',
+    color: isDarkMode ? '#f5f5f4' : '#1c1917',
+    confirmButtonColor: '#f2780c', // Elegant Saffron color matching design system
+    cancelButtonColor: isDarkMode ? '#44403c' : '#d6d3d1', // Stone color matching design system
+    customClass: {
+      popup: 'rounded-[24px] border border-orange-100/50 dark:border-stone-850 shadow-lg font-sans text-xs',
+      title: 'font-spiritual font-extrabold text-base text-saffron-500',
+      htmlContainer: 'font-semibold text-xs',
+      confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md transition-all active:scale-95 text-white bg-saffron-500 hover:bg-saffron-600',
+      cancelButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md transition-all active:scale-95 text-stone-700 dark:text-stone-300 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700'
+    }
+  });
 
   const showNotification = (type, message) => {
     setNotification({ type, message });
@@ -128,22 +154,368 @@ export default function AdminPanel({
     }));
   };
 
+  const addTemporaryCamp = () => {
+    if (!newCamp.name.trim() || !newCamp.category || !newCamp.lat || !newCamp.lng) {
+      const alertMsg = language === 'hi'
+        ? 'कृपया शिविर का नाम, श्रेणी, अक्षांश (Lat) और देशांतर (Lng) दर्ज करें।'
+        : 'Please enter Camp Name, Category, Latitude, and Longitude.';
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'जानकारी अधूरी ⚠️' : 'Fields Incomplete ⚠️',
+        alertMsg,
+        'warning'
+      ));
+      return;
+    }
+
+    const latNum = parseFloat(newCamp.lat);
+    const lngNum = parseFloat(newCamp.lng);
+
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      const errLocMsg = language === 'hi'
+        ? 'अक्षांश (Lat) और देशांतर (Lng) संख्यात्मक होना चाहिए।'
+        : 'Latitude and Longitude must be numerical.';
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'अमान्य कोऑर्डिनेट्स ❌' : 'Invalid Coordinates ❌',
+        errLocMsg,
+        'error'
+      ));
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      temporaryCamps: [
+        ...(prev.temporaryCamps || []),
+        {
+          name: newCamp.name.trim(),
+          category: newCamp.category,
+          lat: latNum,
+          lng: lngNum,
+          description: newCamp.description.trim()
+        }
+      ]
+    }));
+
+    setNewCamp({
+      name: '',
+      category: 'stay',
+      lat: '',
+      lng: '',
+      description: ''
+    });
+
+    Swal.fire(getSwalOptions(
+      language === 'hi' ? 'शिविर जोड़ा गया 🎉' : 'Camp Added 🎉',
+      language === 'hi' ? 'अस्थायी शिविर सूची में सफलतापूर्वक शामिल कर लिया गया है।' : 'Temporary camp successfully added to the list.',
+      'success'
+    ));
+  };
+
+  const removeTemporaryCamp = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      temporaryCamps: (prev.temporaryCamps || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleDecodePlusCode = () => {
+    const rawInput = plusCodeInput.trim();
+    if (!rawInput) {
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'इनपुट गायब' : 'Missing Input',
+        language === 'hi' ? 'कृपया पहले प्लस कोड दर्ज करें।' : 'Please enter a Plus Code first.',
+        'warning'
+      ));
+      return;
+    }
+
+    try {
+      const OpenLocationCode = OLC.OpenLocationCode || OLC;
+      const olc = new OpenLocationCode();
+
+      // Split by whitespace to find the token containing '+'
+      const tokens = rawInput.split(/\s+/);
+      const codeToken = tokens.find(t => t.includes('+'));
+
+      if (!codeToken) {
+        Swal.fire(getSwalOptions(
+          language === 'hi' ? 'प्लस कोड नहीं मिला' : 'No Plus Code Found',
+          language === 'hi'
+            ? 'कृपया प्लस कोड दर्ज करें जिसमें "+" शामिल हो (जैसे: 7764+C2W Dumka, Jharkhand)।'
+            : 'Please make sure it includes the "+" character (e.g. 7764+C2W Dumka, Jharkhand).',
+          'warning'
+        ));
+        return;
+      }
+
+      // Clean the token to get only alphanumeric characters and '+'
+      const cleanCode = codeToken.replace(/[^A-Za-z0-9+]/g, '').toUpperCase();
+
+      if (!olc.isValid(cleanCode)) {
+        Swal.fire(getSwalOptions(
+          language === 'hi' ? 'अवैध प्लस कोड' : 'Invalid Plus Code',
+          language === 'hi' 
+            ? 'अवैध प्लस कोड! कृपया सही फॉर्मेट दर्ज करें (जैसे: 8G4P3CRM+E3 या 3CRM+E3)।' 
+            : 'Invalid Plus Code format! Please enter a valid code (e.g. 8G4P3CRM+E3 or 3CRM+E3).',
+          'error'
+        ));
+        return;
+      }
+
+      // Show loader while decoding (simulate instant feedback)
+      Swal.fire({
+        title: language === 'hi' ? 'प्लस कोड डिकोड हो रहा है...' : 'Decoding Plus Code...',
+        background: isDarkMode ? '#1c1917' : '#ffffff',
+        color: isDarkMode ? '#f5f5f4' : '#1c1917',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      let fullCode = cleanCode;
+      // If it is a short code, recover using Baba Basukinath Temple as reference (24.3850, 87.2514)
+      if (olc.isShort(cleanCode)) {
+        const refLat = 24.3850;
+        const refLng = 87.2514;
+        fullCode = olc.recoverNearest(cleanCode, refLat, refLng);
+      }
+
+      const decoded = olc.decode(fullCode);
+      const latVal = decoded.latitudeCenter.toFixed(6);
+      const lngVal = decoded.longitudeCenter.toFixed(6);
+
+      setNewCamp(prev => ({
+        ...prev,
+        lat: latVal,
+        lng: lngVal
+      }));
+
+      setPlusCodeInput('');
+      Swal.close();
+
+      const successHtml = `
+        <div class="text-left space-y-2.5 leading-relaxed font-semibold">
+          <p class="text-stone-600 dark:text-stone-400">प्लस कोड सफलतापूर्वक डिकोड हुआ और फ़ील्ड्स में भर दिया गया है!</p>
+          <div class="p-3 rounded-xl bg-orange-50/50 dark:bg-stone-900 border border-orange-100/50 dark:border-stone-800 text-[11px] font-mono">
+            📍 <b>Latitude</b>: <span class="text-saffron-600 font-bold">${latVal}</span><br/>
+            📍 <b>Longitude</b>: <span class="text-saffron-600 font-bold">${lngVal}</span>
+          </div>
+        </div>
+      `;
+
+      Swal.fire({
+        ...getSwalOptions(
+          language === 'hi' ? 'डिकोड सफल ⚡' : 'Decoded Successfully ⚡',
+          '',
+          'success'
+        ),
+        html: successHtml
+      });
+    } catch (err) {
+      Swal.close();
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'डिकोडिंग में त्रुटि' : 'Decoding Error',
+        err.message,
+        'error'
+      ));
+    }
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'त्रुटि ⚠️' : 'Error ⚠️',
+        language === 'hi' ? 'आपके ब्राउज़र में जियोलोकेशन (Geolocation) सपोर्ट नहीं है।' : 'Geolocation is not supported by your browser.',
+        'error'
+      ));
+      return;
+    }
+
+    Swal.fire({
+      ...getSwalOptions(
+        language === 'hi' ? 'लोकेशन एक्सेस' : 'Location Access',
+        language === 'hi' ? 'क्या आप ब्राउज़र से अपनी वर्तमान GPS लोकेशन प्राप्त करना चाहते हैं?' : 'Do you want to retrieve your current GPS location from the browser?',
+        'question'
+      ),
+      showCancelButton: true,
+      confirmButtonText: language === 'hi' ? 'हाँ, प्राप्त करें' : 'Yes, retrieve',
+      cancelButtonText: language === 'hi' ? 'रद्द करें' : 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show an animated premium loading spinner!
+        Swal.fire({
+          title: language === 'hi' ? 'GPS लोकेशन प्राप्त हो रही है...' : 'Retrieving GPS Location...',
+          html: language === 'hi' ? '<b>कृपया प्रतीक्षा करें...</b><br/>हम आपकी सटीक लाइव लोकेशन और पता ढूंढ रहे हैं।' : '<b>Please wait...</b><br/>Searching for your precise live location and address.',
+          background: isDarkMode ? '#1c1917' : '#ffffff',
+          color: isDarkMode ? '#f5f5f4' : '#1c1917',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const latVal = position.coords.latitude.toFixed(6);
+            const lngVal = position.coords.longitude.toFixed(6);
+
+            // Auto-fill coordinates instantly
+            setNewCamp(prev => ({
+              ...prev,
+              lat: latVal,
+              lng: lngVal
+            }));
+
+            let addressName = '';
+            try {
+              // Fetch address using OpenStreetMap Nominatim Free Reverse Geocoding API!
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latVal}&lon=${lngVal}&accept-language=${language === 'hi' ? 'hi,en' : 'en'}`);
+              if (res.ok) {
+                const geoData = await res.json();
+                addressName = geoData.display_name || '';
+              }
+            } catch (err) {
+              console.warn('Reverse geocoding failed:', err);
+            }
+
+            // Close the loader
+            Swal.close();
+
+            let successHtml = '';
+            if (language === 'hi') {
+              successHtml = `
+                <div class="text-left space-y-2.5 leading-relaxed font-semibold">
+                  <p class="text-stone-600 dark:text-stone-400">सफलतापूर्वक आपकी लाइव लोकेशन प्राप्त हुई!</p>
+                  <div class="p-3 rounded-xl bg-orange-50/50 dark:bg-stone-900 border border-orange-100/50 dark:border-stone-800 text-[11px] font-mono">
+                    📍 <b>Latitude</b>: <span class="text-saffron-600 font-bold">${latVal}</span><br/>
+                    📍 <b>Longitude</b>: <span class="text-saffron-600 font-bold">${lngVal}</span>
+                  </div>
+                  ${addressName ? `
+                    <p class="text-stone-500 dark:text-stone-400 text-[11px] mt-2">
+                      🏠 <b>जगह का पता (Address):</b><br/>
+                      <span class="text-stone-700 dark:text-stone-300 font-bold">${addressName}</span>
+                    </p>
+                  ` : `
+                    <p class="text-red-500 text-[10px] mt-2">⚠️ (पता खोजने में असमर्थ, लेकिन GPS कोऑर्डिनेट्स कैप्चर कर लिए गए हैं)</p>
+                  `}
+                </div>
+              `;
+            } else {
+              successHtml = `
+                <div class="text-left space-y-2.5 leading-relaxed font-semibold">
+                  <p class="text-stone-600 dark:text-stone-400">Live location retrieved successfully!</p>
+                  <div class="p-3 rounded-xl bg-orange-50/50 dark:bg-stone-900 border border-orange-100/50 dark:border-stone-800 text-[11px] font-mono">
+                    📍 <b>Latitude</b>: <span class="text-saffron-600 font-bold">${latVal}</span><br/>
+                    📍 <b>Longitude</b>: <span class="text-saffron-600 font-bold">${lngVal}</span>
+                  </div>
+                  ${addressName ? `
+                    <p class="text-stone-500 dark:text-stone-400 text-[11px] mt-2">
+                      🏠 <b>Address:</b><br/>
+                      <span class="text-stone-700 dark:text-stone-300 font-bold">${addressName}</span>
+                    </p>
+                  ` : `
+                    <p class="text-red-500 text-[10px] mt-2">⚠️ (Unable to fetch address string, but GPS coordinates are captured)</p>
+                  `}
+                </div>
+              `;
+            }
+
+            Swal.fire({
+              ...getSwalOptions(
+                language === 'hi' ? 'सफलता 📍' : 'Success 📍',
+                '',
+                'success'
+              ),
+              html: successHtml
+            });
+          },
+          (error) => {
+            Swal.close();
+            let errDetail = error.message;
+            if (error.code === 1) {
+              errDetail = language === 'hi' 
+                ? 'लोकेशन एक्सेस ब्लॉक किया गया है। कृपया ब्राउज़र सेटिंग्स में लोकेशन परमिशन दें।' 
+                : 'Permission denied. Please allow location access in your browser settings.';
+            }
+            Swal.fire(getSwalOptions(
+              language === 'hi' ? 'लोकेशन प्राप्त करने में त्रुटि' : 'Error Getting Location',
+              errDetail,
+              'error'
+            ));
+          },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+      }
+    });
+  };
+
+  // Helpline list helpers
+  const addHelpline = () => {
+    if (!newHelpline.name.trim() || !newHelpline.number.trim()) {
+      showNotification('error', language === 'hi' ? 'नाम और नंबर दोनों अनिवार्य हैं!' : 'Both Name and Number are required!');
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      helplines: [...(prev.helplines || []), newHelpline]
+    }));
+    setNewHelpline({ name: '', number: '', description: '' });
+    showNotification('success', language === 'hi' ? 'हेल्पलाइन जोड़ दी गई है!' : 'Helpline contact added!');
+  };
+
+  const removeHelpline = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      helplines: (prev.helplines || []).filter((_, i) => i !== index)
+    }));
+    showNotification('success', language === 'hi' ? 'हेल्पलाइन हटा दी गई है!' : 'Helpline contact removed!');
+  };
+
   // Save changes to Backend MongoDB
   const handleSave = async () => {
     setIsLoading(true);
+    // Show spinner loader!
+    Swal.fire({
+      title: language === 'hi' ? 'सुरक्षित हो रहा है...' : 'Saving Data...',
+      html: language === 'hi' ? '<b>कृपया प्रतीक्षा करें...</b><br/>डेटाबेस (MongoDB) में परिवर्तन सहेजे जा रहे हैं।' : '<b>Please wait...</b><br/>Saving changes to database (MongoDB).',
+      background: isDarkMode ? '#1c1917' : '#ffffff',
+      color: isDarkMode ? '#f5f5f4' : '#1c1917',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await api.post('/temple-data', formData);
       const resData = response.data;
+
+      Swal.close();
 
       const successMsg = language === 'hi'
         ? 'डेटा सफलतापूर्वक डेटाबेस (MongoDB) में सुरक्षित कर दिया गया है!'
         : 'Temple information saved successfully to database (MongoDB)!';
         
-      showNotification('success', successMsg);
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'सफल 🕉️' : 'Success 🕉️',
+        successMsg,
+        'success'
+      ));
+      
       onDataUpdate(resData.data);
     } catch (err) {
+      Swal.close();
       const errMsg = err.response?.data?.error || err.message;
-      showNotification('error', `${language === 'hi' ? 'बचाव विफल:' : 'Save failed:'} ${errMsg}`);
+      Swal.fire(getSwalOptions(
+        language === 'hi' ? 'बचाव विफल' : 'Save Failed',
+        errMsg,
+        'error'
+      ));
     } finally {
       setIsLoading(false);
     }
@@ -155,50 +527,97 @@ export default function AdminPanel({
       ? 'क्या आप सचमुच मंदिर के डेटा को बाबा बासुकीनाथ धाम मंदिर डिफ़ॉल्ट डेटा में रीसेट करना चाहते हैं?'
       : 'Are you sure you want to reset the temple details to Baba Basukinath Dham defaults?';
       
-    if (window.confirm(confirmMsg)) {
-      const defaultTempleData = {
-        name: "बाबा बासुकीनाथ धाम मंदिर",
-        deity: "भगवान शिव (बाबा बासुकीनाथ)",
-        location: "जरमुंडी, दुमका, झारखंड, भारत - 814141",
-        history: "बाबा बासुकीनाथ मंदिर दुमका जिले के जरमुंडी प्रखंड में स्थित एक अत्यंत प्राचीन और ऐतिहासिक हिंदू तीर्थ स्थल है। पौराणिक मान्यताओं के अनुसार, समुद्र मंथन के समय मंदराचल पर्वत को मथने के लिए उपयोग किए गए नागराज वासुकी ने इस पवित्र स्थान पर शिवलिंग स्थापित कर घोर तपस्या की थी, जिससे इस ज्योतिर्लिंग का नाम 'बासुकीनाथ' पड़ा। बासुकीनाथ धाम को 'फौजदारी दरबार' भी कहा जाता है, जहाँ श्रद्धालुओं की अरजी पर बाबा भोलेनाथ तुरंत न्याय (शीघ्र सुनवाई) करते हैं, जबकि देवघर के बाबा बैद्यनाथ को 'मनोकामना लिंग' या देवों की राजधानी माना जाता है। मान्यता है कि जब तक बासुकीनाथ धाम में गंगाजल का अर्पण न किया जाए, तब तक देवघर की पूजा अपूर्ण मानी जाती है। मंदिर परिसर का मुख्य आकर्षण भगवान शिव और माता पार्वती के मंदिरों का आमने-सामने होना है; माना जाता है कि संध्या काल में कपाट खुलने पर शिव और शक्ति का दिव्य मिलन होता है।",
-        timings: [
-          { name: "पट खुलना और प्रातःकालीन दर्शन व पूजा", time: "प्रातः 05:00 बजे" },
-          { name: "दोपहर विश्राम काल (पट बंद)", time: "शाम 05:00 बजे से शाम 06:00 बजे तक" },
-          { name: "दर्शन पुनः प्रारंभ (शाम)", time: "शाम 06:00 बजे से रात्रि 11:00 बजे तक" },
-          { name: "दैनिक शृंगारी पूजा (शाम)", time: "रात्रि 07:30 बजे से रात्रि 10:30 बजे तक" }
-        ],
-        rules: [
-          "मंदिर परिसर में दर्शनार्थियों को स्वच्छ, पारंपरिक और मर्यादित वस्त्र धारण करके ही प्रवेश करना चाहिए।",
-          "गर्भगृह और मुख्य दर्शन कतार के अंदर मोबाइल फोन, कैमरा, चमड़े का बेल्ट या बैग ले जाना पूर्णतः वर्जित है।",
-          "दर्शन के समय शांति बनाए रखें, धक्का-मुक्की न करें और सुरक्षाकर्मियों व न्यास समिति के निर्देशों का पालन करें।",
-          "शृंगारी पूजा और विशेष दर्शन (शीघ्र दर्शन) के बुकिंग पासेज आधिकारिक वेबसाइट या मंदिर के काउंटर से प्राप्त किए जा सकते हैं।"
-        ],
-        festivals: [
-          { name: "श्रावणी मेला (काँवर यात्रा)", date: "सावन मास (जुलाई - अगस्त)", description: "यह मंदिर का सबसे बड़ा वार्षिक उत्सव है। सुल्तानगंज से उत्तरवाहिनी गंगा का पवित्र जल लेकर लाखों काँवरिये लगभग 105 किमी पैदल चलकर बाबा बासुकीनाथ को जलार्पण करने पहुँचते हैं।" },
-          { name: "महाशिवरात्रि", date: "फाल्गुन कृष्ण चतुर्दशी", description: "बाबा बासुकीनाथ और माता पार्वती के पावन विवाह के उपलक्ष्य में भव्य बारात निकाली जाती है और विशेष रात्रि चार प्रहर की पूजा आयोजित होती है।" },
-          { name: "बसंत पंचमी (तिलक उत्सव)", date: "माघ शुक्ल पंचमी", description: "इस शुभ दिन बाबा का विशेष तिलक उत्सव मनाया जाता है। भारी भीड़ के कारण इस दिन शृंगारी पूजा की ऑनलाइन बुकिंग स्थगित रखी जाती है।" }
-        ],
-        donations: "बाबा बासुकीनाथ मंदिर न्यास समिति के आधिकारिक बैंक खाते में सीधे दान दिया जा सकता है:\nबैंक: भारतीय स्टेट बैंक (SBI)\nखाता नाम: बाबा बासुकीनाथ मंदिर न्यास समिति\nखाता संख्या: 39112233445\nIFSC कोड: SBIN0001037\nUPI ID: basukinathmandir@sbi\n(दान में प्राप्त राशि का उपयोग मंदिर परिसर के रख-रखाव, चिकित्सा शिविरों और काँवरियों की निशुल्क भोजन-आवास व्यवस्था में किया जाता है)।",
-        contact: "हेल्पलाइन: +91 94313 XXXXX\nईमेल: basukinathmandir@gmail.com\nपता: बाबा बासुकीनाथ मंदिर न्यास समिति कार्यालय, जरमुंडी, दुमका, झारखंड - 814141",
-        customSections: [
-          {
-            title: "तीर्थयात्री सेवा बुकिंग (Services)",
-            content: "बाबा बासुकीनाथ मंदिर में श्रद्धालुओं के लिए विभिन्न ऑनलाइन व ऑफलाइन सेवाएं उपलब्ध हैं:\n- **शीघ्र दर्शन (Shighra Darshan)**: लंबी कतारों से बचने के लिए उपलब्ध विशेष प्रवेश व्यवस्था।\n- **शृंगारी पूजा (Sringari)**: बाबा भोलेनाथ का गंगाजल, फूलों और उत्तम सामग्रियों से किया जाने वाला विशेष पूजन। (प्रतिदिन केवल 22 स्लॉट उपलब्ध हैं)\n- **अन्य पूजा अनुष्ठान**: मनकामना पूजा, वंश पूजा, ध्वजारोहण, रुद्राभिषेक, चौपहरा, उपनयन संस्कार, मुंडन, और विवाह संस्कार आदि मंदिर परिसर के विभिन्न मंडपों में पुरोहितों द्वारा विधि-विधान से संपन्न कराए जाते हैं।"
-          },
-          {
-            title: "श्रावणी मेला व सुविधाएं (Shrawani Mela Camps)",
-            content: "श्रावण मास (जुलाई-अगस्त) के दौरान सुल्तानगंज से पवित्र गंगाजल लेकर पैदल यात्रा करने वाले लाखों 'काँवरियों' के लिए दुमका जिला प्रशासन द्वारा विशेष प्रबंध किए जाते हैं:\n- **आवास व्यवस्था (Accommodation)**: श्रद्धालुओं के आराम के लिए मार्ग में सुरक्षित एवं निशुल्क विश्राम शिविर (Camps) स्थापित किए जाते हैं।\n- **चिकित्सा शिविर (Medical Camps)**: संपूर्ण काँवरिया पथ पर प्राथमिक और आपातकालीन चिकित्सा सहायता प्रदान करने के लिए मेडिकल टीमें तैनात रहती हैं।\n- **परिवहन (Transportation)**: भक्तों की सुगम आवाजाही के लिए मंदिर परिसर और दुमका/देवघर रेलवे स्टेशनों व बस स्टैंडों के बीच अतिरिक्त बसों व वाहनों की व्यवस्था की जाती है।"
+    Swal.fire({
+      ...getSwalOptions(
+        language === 'hi' ? 'डेटा रीसेट' : 'Reset Data',
+        confirmMsg,
+        'warning'
+      ),
+      showCancelButton: true,
+      confirmButtonText: language === 'hi' ? 'हाँ, रीसेट करें' : 'Yes, reset',
+      cancelButtonText: language === 'hi' ? 'रद्द करें' : 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show loader while resetting
+        Swal.fire({
+          title: language === 'hi' ? 'रीसेट हो रहा है...' : 'Resetting...',
+          background: isDarkMode ? '#1c1917' : '#ffffff',
+          color: isDarkMode ? '#f5f5f4' : '#1c1917',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
           }
-        ]
-      };
-      
-      setFormData(defaultTempleData);
-      
-      const notificationMsg = language === 'hi'
-        ? 'डिफ़ॉल्ट डेटा लोड हो गया है। कृपया लागू करने के लिए "डेटा सेव करें" दबाएं।'
-        : 'Default data loaded. Please click "Save Data" to commit changes.';
-      showNotification('success', notificationMsg);
-    }
+        });
+
+        const defaultTempleData = {
+          name: "बाबा बासुकीनाथ धाम मंदिर",
+          deity: "भगवान शिव (बाबा बासुकीनाथ)",
+          location: "जरमुंडी, दुमका, झारखंड, भारत - 814141",
+          history: "बाबा बासुकीनाथ मंदिर दुमका जिले के जरमुंडी प्रखंड में स्थित एक अत्यंत प्राचीन और ऐतिहासिक हिंदू तीर्थ स्थल है। पौराणिक मान्यताओं के अनुसार, समुद्र मंथन के समय मंदराचल पर्वत को मथने के लिए उपयोग किए गए नागराज वासुकी ने इस पवित्र स्थान पर शिवलिंग स्थापित कर घोर तपस्या की थी, जिससे इस ज्योतिर्लिंग का नाम 'बासुकीनाथ' पड़ा। बासुकीनाथ धाम को 'फौजदारी दरबार' भी कहा जाता है, जहाँ श्रद्धालुओं की अरजी पर बाबा भोलेनाथ तुरंत न्याय (शीघ्र सुनवाई) करते हैं, जबकि देवघर के बाबा बैद्यनाथ को 'मनोकामना लिंग' या देवों की राजधानी माना जाता है। मान्यता है कि जब तक बासुकीनाथ धाम में गंगाजल का अर्पण न किया जाए, तब तक देवघर की पूजा अपूर्ण मानी जाती है। मंदिर परिसर का मुख्य आकर्षण भगवान शिव और माता पार्वती के मंदिरों का आमने-सामने होना है; माना जाता है कि संध्या काल में कपाट खुलने पर शिव और शक्ति का दिव्य मिलन होता है।",
+          timings: [
+            { name: "पट खुलना और प्रातःकालीन दर्शन व पूजा", time: "प्रातः 05:00 बजे" },
+            { name: "दोपहर विश्राम काल (पट बंद)", time: "शाम 05:00 बजे से शाम 06:00 बजे तक" },
+            { name: "दर्शन पुनः प्रारंभ (शाम)", time: "शाम 06:00 बजे से रात्रि 11:00 बजे तक" },
+            { name: "दैनिक शृंगारी पूजा (शाम)", time: "रात्रि 07:30 बजे से रात्रि 10:30 बजे तक" }
+          ],
+          rules: [
+            "मंदिर परिसर में दर्शनार्थियों को स्वच्छ, पारंपरिक और मर्यादित वस्त्र धारण करके ही प्रवेश करना चाहिए।",
+            "गर्भगृह और मुख्य दर्शन कतार के अंदर मोबाइल फोन, कैमरा, चमड़े का बेल्ट या बैग ले जाना पूर्णतः वर्जित है।",
+            "दर्शन के समय शांति बनाए रखें, धक्का-मुक्की न करें और सुरक्षाकर्मियों व न्यास समिति के निर्देशों का पालन करें।",
+            "शृंगारी पूजा और विशेष दर्शन (शीघ्र दर्शन) के बुकिंग पासेज आधिकारिक वेबसाइट या मंदिर के काउंटर से प्राप्त किए जा सकते हैं।"
+          ],
+          festivals: [
+            { name: "श्रावणी मेला (काँवर यात्रा)", date: "सावन मास (जुलाई - अगस्त)", description: "यह मंदिर का सबसे बड़ा वार्षिक उत्सव है। सुल्तानगंज से उत्तरवाहिनी गंगा का पवित्र जल लेकर लाखों काँवरिये लगभग 105 किमी पैदल चलकर बाबा बासुकीनाथ को जलार्पण करने पहुँचते हैं।" },
+            { name: "महाशिवरात्रि", date: "फाल्गुन कृष्ण चतुर्दशी", description: "बाबा बासुकीनाथ और माता पार्वती के पावन विवाह के उपलक्ष्य में भव्य बारात निकाली जाती है और विशेष रात्रि चार प्रहर की पूजा आयोजित होती है।" },
+            { name: "बसंत पंचमी (तिलक उत्सव)", date: "माघ शुक्ल पंचमी", description: "इस शुभ दिन बाबा का विशेष तिलक उत्सव मनाया जाता है। भारी भीड़ के कारण इस दिन शृंगारी पूजा की ऑनलाइन बुकिंग स्थगित रखी जाती है।" }
+          ],
+          donations: "बाबा बासुकीनाथ मंदिर न्यास समिति के आधिकारिक बैंक खाते में सीधे दान दिया जा सकता है:\nबैंक: भारतीय स्टेट बैंक (SBI)\nखाता नाम: बाबा बासुकीनाथ मंदिर न्यास समिति\nखाता संख्या: 39112233445\nIFSC कोड: SBIN0001037\nUPI ID: basukinathmandir@sbi\n(दान में प्राप्त राशि का उपयोग मंदिर परिसर के रख-रखाव, चिकित्सा शिविरों और काँवरियों की निशुल्क भोजन-आवास व्यवस्था में किया जाता है)।",
+          contact: "हेल्पलाइन: +91 94313 XXXXX\nईमेल: basukinathmandir@gmail.com\nपता: बाबा बासुकीनाथ मंदिर न्यास समिति कार्यालय, जरमुंडी, दुमका, झारखंड - 814141",
+          customSections: [
+            {
+              title: "तीर्थयात्री सेवा बुकिंग (Services)",
+              content: "बाबा बासुकीनाथ मंदिर में श्रद्धालुओं के लिए विभिन्न ऑनलाइन व offline सेवाएं उपलब्ध हैं:\n- **शीघ्र दर्शन (Shighra Darshan)**: लंबी कतारों से बचने के लिए उपलब्ध विशेष प्रवेश व्यवस्था।\n- **शृंगारी पूजा (Sringari)**: बाबा भोलेनाथ का गंगाजल, फूलों और उत्तम सामग्रियों से किया जाने वाला विशेष पूजन। (प्रतिदिन केवल 22 स्लॉट उपलब्ध हैं)\n- **अन्य पूजा अनुष्ठान**: मनकामना पूजा, वंश पूजा, ध्वजारोहण, रुद्राभिषेक, चौपहरा, उपनयन संस्कार, मुंडन, और विवाह संस्कार आदि मंदिर परिसर के विभिन्न मंडपों में पुरोहितों द्वारा विधि-विधान से संपन्न कराते हैं।"
+            },
+            {
+              title: "श्रावणी मेला व सुविधाएं (Shrawani Mela Camps)",
+              content: "श्रावण मास (जुलाई-अगस्त) के दौरान सुल्तानगंज से पवित्र गंगाजल लेकर पैदल यात्रा करने वाले लाखों 'काँवरियों' के लिए दुमका जिला प्रशासन द्वारा विशेष प्रबंध किए जाते हैं:\n- **आवास व्यवस्था (Accommodation)**: श्रद्धालुओं के आराम के लिए मार्ग में सुरक्षित एवं निशुल्क विश्राम शिविर (Camps) स्थापित किए जाते हैं.\n- **चिकित्सा शिविर (Medical Camps)**: संपूर्ण काँवरिया पथ पर प्राथमिक और आपातकालीन चिकित्सा सहायता प्रदान करने के लिए मेडिकल टीमें तैनात रहती हैं.\n- **परिवहन (Transportation)**: भक्तों की सुगम आवाजाही के लिए मंदिर परिसर और दुमका/देवघर रेलवे स्टेशनों व बस स्टैंडों के बीच अतिरिक्त बसों व वाहनों की व्यवस्था की जाती है।"
+            }
+          ],
+          temporaryCamps: [],
+          helplines: [
+            {
+              name: "पुलिस थाना जरमुंडी (Jarmundi Police Station)",
+              number: "+91-9431706240",
+              description: "आपातकालीन सुरक्षा एवं पुलिस सहायता के लिए (Emergency assistance)"
+            },
+            {
+              name: "एंबुलेंस और चिकित्सा सेवा (Ambulance & Medical)",
+              number: "108",
+              description: "आपातकालीन स्वास्थ्य सहायता के लिए (Emergency medical assistance)"
+            },
+            {
+              name: "मंदिर न्यास समिति हेल्पलाइन (Temple Trust Helpline)",
+              number: "+91-9431301037",
+              description: "मंदिर परिसर की जानकारी एवं पूजा बुकिंग सहायता के लिए (Temple info & puja booking)"
+            },
+            {
+              name: "फायर ब्रिगेड / दमकल सेवा (Fire Brigade)",
+              number: "101",
+              description: "अग्निशमन आपातकाल के लिए (Fire emergencies)"
+            }
+          ]
+        };
+        
+        setFormData(defaultTempleData);
+        Swal.close();
+        
+        const notificationMsg = language === 'hi'
+          ? 'डिफ़ॉल्ट डेटा लोड हो गया है। कृपया लागू करने के लिए "डेटा सेव करें" दबाएं।'
+          : 'Default data loaded. Please click "Save Data" to commit changes.';
+        showNotification('success', notificationMsg);
+      }
+    });
   };
 
   return (
@@ -666,6 +1085,311 @@ export default function AdminPanel({
             >
               <Plus className="w-3.5 h-3.5 stroke-[3]" />
               <span>{t('adminAddCustomSectionBtn', language)}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Section 7: Temporary Camps & Shivirs */}
+        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+          isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
+        }`}>
+          <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
+            <span>{t('adminSec7', language)}</span>
+            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-extrabold font-sans">
+              {language === 'hi' ? `कुल: ${(formData.temporaryCamps || []).length}` : `Total: ${(formData.temporaryCamps || []).length}`}
+            </span>
+          </h3>
+
+          {/* Current Temporary Camps List */}
+          <div className="space-y-3">
+            {(!formData.temporaryCamps || formData.temporaryCamps.length === 0) ? (
+              <p className="text-xs text-stone-400 text-center py-4">{t('adminNoCamps', language)}</p>
+            ) : (
+              formData.temporaryCamps.map((camp, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-orange-50/50 dark:bg-stone-900 border border-orange-100/50 dark:border-stone-800 text-xs space-y-2 relative animate-fadeIn">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="font-extrabold text-stone-700 dark:text-stone-300 text-sm flex items-center gap-2">
+                        {camp.name}
+                        <span className="text-[10px] px-2 py-0.5 bg-saffron-100 text-saffron-800 dark:bg-saffron-950/40 dark:text-saffron-400 rounded-full font-bold uppercase">
+                          {t(`adminCategory${camp.category.charAt(0).toUpperCase() + camp.category.slice(1)}`, language)}
+                        </span>
+                      </span>
+                      <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold mt-1">
+                        GPS: {camp.lat}, {camp.lng}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeTemporaryCamp(idx)}
+                      className="p-1 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 rounded-lg transition-colors"
+                      title="Remove temporary camp"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {camp.description && (
+                    <p className="text-stone-500 dark:text-stone-400 text-xs leading-relaxed font-medium whitespace-pre-line border-t border-stone-200 dark:border-stone-800 pt-2">
+                      {camp.description}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Add New Temporary Camp Form */}
+          <div className="p-4 bg-stone-50 dark:bg-stone-900/50 rounded-2xl border border-stone-100 dark:border-stone-800/80 space-y-3">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+              {t('adminAddCampLabel', language)}
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="camp-name">
+                  {t('adminAddCampName', language)}
+                </label>
+                <input
+                  id="camp-name"
+                  type="text"
+                  value={newCamp.name}
+                  onChange={(e) => setNewCamp(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g. Bhandara Camp No. 1"
+                  className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="camp-category">
+                  {t('adminAddCampCategory', language)}
+                </label>
+                <select
+                  id="camp-category"
+                  value={newCamp.category}
+                  onChange={(e) => setNewCamp(prev => ({ ...prev, category: e.target.value }))}
+                  className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none font-bold ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                >
+                  <option value="stay">{t('adminCategoryStay', language)}</option>
+                  <option value="medical">{t('adminCategoryMedical', language)}</option>
+                  <option value="food">{t('adminCategoryFood', language)}</option>
+                  <option value="transport">{t('adminCategoryTransport', language)}</option>
+                  <option value="atm">{t('adminCategoryAtm', language)}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Plus Code to Lat/Lng Converter */}
+            <div className="p-3.5 bg-orange-50/40 dark:bg-stone-900/40 rounded-xl border border-orange-100/50 dark:border-stone-800/80 space-y-2">
+              <label className="block text-[10px] font-extrabold text-saffron-600 dark:text-saffron-400" htmlFor="camp-plus-code">
+                {language === 'hi' 
+                  ? '⚡ प्लस कोड से Lat/Lng निकालें (Plus Code Converter - Optional)' 
+                  : '⚡ Get Lat/Lng from Plus Code (Optional)'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="camp-plus-code"
+                  type="text"
+                  value={plusCodeInput}
+                  onChange={(e) => setPlusCodeInput(e.target.value)}
+                  placeholder={language === 'hi' ? 'उदा: 8G4P3CRM+E3 या 3CRM+E3' : 'e.g., 8G4P3CRM+E3 or 3CRM+E3'}
+                  className={`flex-1 px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none transition-all ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={handleDecodePlusCode}
+                  className="px-4 py-2 bg-saffron-500 hover:bg-saffron-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm active:scale-95 shrink-0"
+                >
+                  {language === 'hi' ? 'डिकोड करें' : 'Decode'}
+                </button>
+              </div>
+              <p className="text-[9px] text-stone-400 dark:text-stone-500 leading-tight">
+                {language === 'hi'
+                  ? 'गूगल मैप्स से कॉपी किया गया प्लस कोड डालें और बटन पर क्लिक करें। ऐप इसे तुरंत अक्षांश और देशांतर में बदल देगा।'
+                  : 'Enter a Plus Code from Google Maps and click Decode. It will automatically convert and fill in the fields below.'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="camp-latitude">
+                  {t('adminAddCampLat', language)}
+                </label>
+                <input
+                  id="camp-latitude"
+                  type="number"
+                  step="any"
+                  value={newCamp.lat}
+                  onChange={(e) => setNewCamp(prev => ({ ...prev, lat: e.target.value }))}
+                  placeholder="e.g. 24.3885"
+                  className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="camp-longitude">
+                  {t('adminAddCampLng', language)}
+                </label>
+                <input
+                  id="camp-longitude"
+                  type="number"
+                  step="any"
+                  value={newCamp.lng}
+                  onChange={(e) => setNewCamp(prev => ({ ...prev, lng: e.target.value }))}
+                  placeholder="e.g. 87.2525"
+                  className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Current Geolocation Button */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 dark:bg-stone-900 border border-blue-200 dark:border-stone-800 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold rounded-lg hover:bg-blue-100 dark:hover:bg-stone-800 transition-colors shadow-sm active:scale-95 shrink-0"
+              >
+                <span>📍</span>
+                <span>{language === 'hi' ? 'मेरी वर्तमान लोकेशन का उपयोग करें' : 'Use My Current Location'}</span>
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="camp-desc">
+                {t('adminAddCampDesc', language)}
+              </label>
+              <textarea
+                id="camp-desc"
+                value={newCamp.description}
+                onChange={(e) => setNewCamp(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe facilities (e.g., Free water, beds, food schedule)..."
+                rows={2}
+                className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                  isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                }`}
+              />
+            </div>
+
+            <button
+              onClick={addTemporaryCamp}
+              className="w-full py-2.5 bg-orange-100 hover:bg-orange-200 dark:bg-saffron-950/30 dark:hover:bg-saffron-900/30 text-saffron-600 dark:text-saffron-400 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span>{t('adminAddCampBtn', language)}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Section 8: Emergency Helplines & Assistance */}
+        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+          isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
+        }`}>
+          <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
+            <span>{t('adminSec8', language)}</span>
+            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-extrabold font-sans">
+              {language === 'hi' ? `कुल: ${(formData.helplines || []).length}` : `Total: ${(formData.helplines || []).length}`}
+            </span>
+          </h3>
+
+          {/* Current Helplines List */}
+          <div className="space-y-3">
+            {(!formData.helplines || formData.helplines.length === 0) ? (
+              <p className="text-xs text-stone-400 text-center py-4">{t('adminNoHelplines', language)}</p>
+            ) : (
+              formData.helplines.map((helpline, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-orange-50/50 dark:bg-stone-900 border border-orange-100/50 dark:border-stone-800 text-xs space-y-2 relative animate-fadeIn">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="font-extrabold text-stone-700 dark:text-stone-300 text-sm flex items-center gap-2">
+                        📞 {helpline.name}
+                      </span>
+                      <div className="text-xs text-saffron-600 dark:text-saffron-400 font-extrabold mt-1">
+                        Number: <span className="font-mono">{helpline.number}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeHelpline(idx)}
+                      className="p-1 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 rounded-lg transition-colors"
+                      title="Remove helpline"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {helpline.description && (
+                    <p className="text-stone-500 dark:text-stone-400 text-xs leading-relaxed font-medium whitespace-pre-line border-t border-stone-200 dark:border-stone-800 pt-2">
+                      {helpline.description}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Add New Helpline Form */}
+          <div className="p-4 bg-stone-50 dark:bg-stone-900/50 rounded-2xl border border-stone-100 dark:border-stone-800/80 space-y-3">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+              {t('adminAddHelplineLabel', language)}
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="helpline-name">
+                  {t('adminAddHelplineName', language)}
+                </label>
+                <input
+                  id="helpline-name"
+                  type="text"
+                  value={newHelpline.name}
+                  onChange={(e) => setNewHelpline(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g. Police Station Jarmundi"
+                  className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="helpline-number">
+                  {t('adminAddHelplineNumber', language)}
+                </label>
+                <input
+                  id="helpline-number"
+                  type="text"
+                  value={newHelpline.number}
+                  onChange={(e) => setNewHelpline(prev => ({ ...prev, number: e.target.value }))}
+                  placeholder="e.g. +91 94317 XXXXX"
+                  className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-extrabold text-stone-400 dark:text-stone-500 mb-1" htmlFor="helpline-desc">
+                {t('adminAddHelplineDesc', language)}
+              </label>
+              <textarea
+                id="helpline-desc"
+                value={newHelpline.description}
+                onChange={(e) => setNewHelpline(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Details of helpline or availability schedule..."
+                rows={2}
+                className={`w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-saffron-500 focus:outline-none ${
+                  isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                }`}
+              />
+            </div>
+
+            <button
+              onClick={addHelpline}
+              className="w-full py-2.5 bg-orange-100 hover:bg-orange-200 dark:bg-saffron-950/30 dark:hover:bg-saffron-900/30 text-saffron-600 dark:text-saffron-400 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span>{t('adminAddHelplineBtn', language)}</span>
             </button>
           </div>
         </div>

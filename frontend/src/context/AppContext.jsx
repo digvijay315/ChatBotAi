@@ -158,10 +158,47 @@ export function AppContextProvider({ children }) {
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
+    let latitude = null;
+    let longitude = null;
+
+    try {
+      if (navigator.geolocation) {
+        // Try getting location with High Accuracy (Wi-Fi triangulation) first
+        let position;
+        try {
+          position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 3000, // 3-second timeout for fast lock
+              maximumAge: 0
+            });
+          });
+        } catch (highAccErr) {
+          console.warn("⚠️ High-accuracy location failed/timeout. Falling back to standard accuracy...", highAccErr.message);
+          // Fallback to standard (IP-based) accuracy
+          position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: false,
+              timeout: 3000,
+              maximumAge: 60000 // Cache for 1 minute
+            });
+          });
+        }
+        
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+        console.log(`📍 Acquired Geolocation successfully: Lat ${latitude}, Lng ${longitude}`);
+      }
+    } catch (geoErr) {
+      console.warn("❌ Both geolocation attempts failed/denied/timed out:", geoErr.message);
+    }
+
     try {
       const response = await api.post('/chat', {
         message: text,
-        sessionId: activeSessionId
+        sessionId: activeSessionId,
+        latitude,
+        longitude
       });
       const resData = response.data;
 

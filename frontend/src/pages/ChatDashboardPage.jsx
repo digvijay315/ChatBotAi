@@ -72,7 +72,7 @@ export default function ChatDashboardPage() {
           />
 
           {/* Dynamic Content Panel */}
-          <main className="flex-1 flex flex-col justify-between">
+          <main className="flex-1 flex flex-col justify-between min-w-0">
             {/* Header bar */}
             <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 px-4 py-2 border-b border-orange-100/50 dark:border-stone-850 pb-4">
               <div>

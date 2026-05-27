@@ -132,7 +132,12 @@ export default function ChatArea({
     { text: t('quickAarti', language), query: t('quickAartiQuery', language) },
     { text: t('quickHistory', language), query: t('quickHistoryQuery', language) },
     { text: t('quickRules', language), query: t('quickRulesQuery', language) },
-    { text: t('quickDonation', language), query: t('quickDonationQuery', language) }
+    { text: t('quickDonation', language), query: t('quickDonationQuery', language) },
+    { text: t('quickHotels', language), query: t('quickHotelsQuery', language) },
+    { text: t('quickHospitals', language), query: t('quickHospitalsQuery', language) },
+    { text: t('quickAshrams', language), query: t('quickAshramsQuery', language) },
+    { text: t('quickTransport', language), query: t('quickTransportQuery', language) },
+    { text: t('quickATMs', language), query: t('quickATMsQuery', language) }
   ];
 
   return (
@@ -210,7 +215,7 @@ export default function ChatArea({
               <p className="text-[10px] font-extrabold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                 {t('quickPromptsHeader', language)}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-left">
                 {quickQuestions.map((q, idx) => (
                   <button
                     key={idx}

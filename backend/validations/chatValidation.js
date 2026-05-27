@@ -7,5 +7,7 @@ export const chatQuerySchema = Joi.object({
   }),
   sessionId: Joi.string().required().messages({
     'any.required': 'चैट सत्र (Session ID) आवश्यक है।'
-  })
+  }),
+  latitude: Joi.number().allow(null).optional(),
+  longitude: Joi.number().allow(null).optional()
 });

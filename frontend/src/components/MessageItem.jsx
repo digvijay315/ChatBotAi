@@ -29,6 +29,9 @@ export default function MessageItem({ message, isDarkMode }) {
     // 4. Format bold text: **text**
     escaped = escaped.replace(/\*\*([\s\S]*?)\*\*/g, '<strong class="font-bold text-saffron-700 dark:text-saffron-400">$1</strong>');
 
+    // 4.5 Format Markdown links: [text](url)
+    escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-saffron-600 hover:text-saffron-700 dark:text-saffron-400 dark:hover:text-saffron-300 underline font-bold transition-all hover:scale-105 inline-block">$1</a>');
+
     // 5. Format bullets: line starting with "* " or "- "
     escaped = escaped.replace(/^\s*[*+-]\s+(.+)$/gm, '<li class="list-disc ml-4 my-1 pl-1 leading-relaxed">$1</li>');
 
