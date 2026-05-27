@@ -33,5 +33,11 @@ export const templeUpdateSchema = Joi.object({
       number: Joi.string().required().messages({ 'any.required': 'हेल्पलाइन नंबर अनिवार्य है।' }),
       description: Joi.string().allow('').optional()
     }).unknown(true)
-  ).optional()
+  ).optional(),
+  disabledAssistance: Joi.object({
+    wheelchairsAvailable: Joi.string().allow('').optional(),
+    eRickshawRoutes: Joi.string().allow('').optional(),
+    specialEntryGates: Joi.string().allow('').optional(),
+    helplineNumber: Joi.string().allow('').optional()
+  }).optional()
 }).unknown(true);

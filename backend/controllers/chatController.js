@@ -58,20 +58,52 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
                      q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा') || q.includes('पैसे');
                      
   const isFoodQuery = q.includes('bhandara') || q.includes('langar') || q.includes('food') || q.includes('khana') ||
-                      q.includes('भंडारा') || q.includes('लंगर') || q.includes('भोजन') || q.includes('खाना') || q.includes('प्रसाद');
+                      q.includes('भंडारा') || q.includes('लंगर') || q.includes('भोजन') || q.includes('खाना') || q.includes('प्रसाद') ||
+                      q.includes('milk') || q.includes('dudh') || q.includes('doodh') || q.includes('दूध') || q.includes('cow') ||
+                      q.includes('vitran') || q.includes('वितरण');
                       
   const isCampQuery = q.includes('camp') || q.includes('shivir') ||
                       q.includes('शिविर') || q.includes('कैंप');
 
-  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery ||
+  const isActiveCampsQuery = q.includes('active camp') || q.includes('temporary camp') || q.includes('camp list') || q.includes('all shivir') || q.includes('active shivir') ||
+                             q.includes('सक्रिय शिविर') || q.includes('अस्थायी शिविर') || q.includes('शिविरों की सूची') || q.includes('sabhi shivir') || q.includes('shivir list');
+
+  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery || isActiveCampsQuery ||
                             q.includes('facility') || q.includes('suvidha') || q.includes('nearby') || q.includes('paas') ||
                             q.includes('सुविधा') || q.includes('पास') || q.includes('नजदीक');
 
   if (isAmenitiesSearch) {
     let targetCategories = [];
     let facilityName = "जन-सुविधाओं और शिविरों";
+    let showOnlyTemporary = false;
 
-    if (isHotelQuery) {
+    if (isActiveCampsQuery) {
+      showOnlyTemporary = true;
+      let targetCampCategory = null;
+      let categoryLabel = "अस्थायी शिविरों";
+      
+      if (q.includes('stay') || q.includes('accommodation') || q.includes('aawas') || q.includes('thaharne') || q.includes('rukne') || q.includes('आवास') || q.includes('ठहरने') || q.includes('रुकने')) {
+        targetCampCategory = 'stay';
+        categoryLabel = "अस्थायी आवास / ठहरने के शिविर (Accommodation Camps)";
+      } else if (q.includes('medical') || q.includes('hospital') || q.includes('doctor') || q.includes('chikit') || q.includes('dawai') || q.includes('dawa') || q.includes('health') || q.includes('चिकित्सा') || q.includes('स्वास्थ्य') || q.includes('अस्पताल') || q.includes('इलाज') || q.includes('दवाई')) {
+        targetCampCategory = 'medical';
+        categoryLabel = "अस्थायी चिकित्सा शिविर (Medical Help Camps)";
+      } else if (q.includes('food') || q.includes('langar') || q.includes('bhandara') || q.includes('khana') || q.includes('dudh') || q.includes('milk') || q.includes('भोजन') || q.includes('लंगर') || q.includes('भंडारा') || q.includes('खाना') || q.includes('दूध')) {
+        targetCampCategory = 'food';
+        categoryLabel = "भोजन / भंडारा / लंगर सेवा शिविर (Food & Langar Camps)";
+      } else if (q.includes('transport') || q.includes('bus') || q.includes('station') || q.includes('stand') || q.includes('gaadi') || q.includes('vahan') || q.includes('परिवहन') || q.includes('बस') || q.includes('गाड़ी') || q.includes('वाहन')) {
+        targetCampCategory = 'transport';
+        categoryLabel = "अस्थायी परिवहन / बस सेवा शिविर (Transport Camps)";
+      } else if (q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise') || q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा')) {
+        targetCampCategory = 'atm';
+        categoryLabel = "अस्थायी एटीएम / बैंकिंग शिविर (ATM Camps)";
+      }
+      
+      facilityName = `सक्रिय ${categoryLabel}`;
+      if (targetCampCategory) {
+        targetCategories = [targetCampCategory];
+      }
+    } else if (isHotelQuery) {
       targetCategories = ['hotel', 'ashram', 'stay'];
       facilityName = "ठहरने की उत्तम व्यवस्था (होटल, धर्मशाला और आश्रम)";
     } else if (isHospitalQuery) {
@@ -94,9 +126,16 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
       facilityName = "अस्थायी शिविरों (आवास, स्वास्थ्य और भोजन)";
     }
 
-    const filteredPlaces = targetCategories.length > 0 
+    let filteredPlaces = targetCategories.length > 0 
       ? placesList.filter(p => targetCategories.includes(p.category))
       : placesList;
+
+    if (showOnlyTemporary) {
+      filteredPlaces = placesList.filter(p => p.isTemporary === true);
+      if (targetCategories.length > 0) {
+        filteredPlaces = filteredPlaces.filter(p => targetCategories.includes(p.category));
+      }
+    }
 
     reply += `यहाँ आपके सबसे पास की ${facilityName} की जानकारी दी गई है। `;
     
@@ -120,6 +159,25 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
         reply += `📍 **${p.name}**:\n   - **मंदिर से दूरी**: लगभग ${dist} किमी\n   - **गूगल मैप्स**: [यहाँ खोजें](${routeLink})\n\n`;
       });
     }
+    return reply;
+  }
+
+  if (q.includes('wheelchair') || q.includes('disabled') || q.includes('divyang') || q.includes('buzurg') || q.includes('buda') || q.includes('chalne me dikkat') || q.includes('parents') || q.includes('dadi') || q.includes('dada') || q.includes('दिव्यांग') || q.includes('बुजुर्ग') || q.includes('व्हीलचेयर') || q.includes('सहायता')) {
+    const da = data.disabledAssistance || {
+      wheelchairsAvailable: "मुख्य बस स्टैंड और मंदिर न्यास कार्यालय (गेट नंबर 1) पर निशुल्क व्हीलचेयर उपलब्ध हैं।",
+      eRickshawRoutes: "बस स्टैंड से सिंह द्वार तक निशुल्क ई-रिक्शा सेवा सक्रिय है।",
+      specialEntryGates: "70 वर्ष से अधिक आयु के बुजुर्गों और दिव्यांगों के लिए गेट नंबर 3 से सीधे निशुल्क प्रवेश की व्यवस्था है (लाइन में लगने की आवश्यकता नहीं है)।",
+      helplineNumber: "+91-9431301037"
+    };
+
+    reply += `वृद्ध एवं दिव्यांग श्रद्धालुओं के लिए मंदिर परिसर में निम्नलिखित विशेष व्यवस्थाएं की गई हैं:\n\n`;
+    reply += `♿ **निशुल्क व्हीलचेयर सेवा (Wheelchair Pick-up):**\n   - ${da.wheelchairsAvailable || 'मुख्य द्वारों पर निशुल्क उपलब्ध।'}\n\n`;
+    reply += `🛺 **निशुल्क ई-रिक्शा रूट (Free E-Rickshaw):**\n   - ${da.eRickshawRoutes || 'बस स्टैंड से सिंह द्वार मार्ग पर संचालित।'}\n\n`;
+    reply += `🎟️ **विशेष प्रवेश द्वार (Special Direct Darshan Gate):**\n   - ${da.specialEntryGates || 'बुजुर्गों और दिव्यांगों के लिए डायरेक्ट प्रवेश उपलब्ध।'}\n\n`;
+    if (da.helplineNumber) {
+      reply += `📞 **विशेष सहायता डेस्क (Volunteer Support Helpline):**\n   - [कॉल करें (${da.helplineNumber})](tel:${da.helplineNumber})\n\n`;
+    }
+    reply += `कृपया इन सुविधाओं का लाभ उठाएं। बाबा बासुकीनाथ आपकी यात्रा मंगलमय करें! 🙏`;
     return reply;
   }
 
@@ -158,7 +216,8 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
     return reply;
   }
 
-  if (q.includes('contact') || q.includes('phone') || q.includes('helpline') || q.includes('email') || q.includes('address') || q.includes('location') || q.includes('pata') || q.includes('kahan') || q.includes('reach') || q.includes('rasta') || q.includes('route') || q.includes('police') || q.includes('medical') || q.includes('emergency')) {
+  if (q.includes('contact') || q.includes('phone') || q.includes('helpline') || q.includes('email') || q.includes('address') || q.includes('location') || q.includes('pata') || q.includes('kahan') || q.includes('reach') || q.includes('rasta') || q.includes('route') || q.includes('police') || q.includes('medical') || q.includes('emergency') ||
+      q.includes('आपातकालीन') || q.includes('हेल्पलाइन') || q.includes('संपर्क') || q.includes('सम्पर्क') || q.includes('नंबर') || q.includes('फोन') || q.includes('आपात') || q.includes('apatkalin')) {
     reply += `मंदिर का पता और संपर्क सूत्र इस प्रकार है:\n\n📍 **स्थान**: ${data.location}\n\n${data.contact}`;
     if (data.helplines && data.helplines.length > 0) {
       reply += `\n\n🚨 **आपातकालीन हेल्पलाइन नंबर (Emergency Helplines)**:\n`;
@@ -303,7 +362,8 @@ export const postMessage = async (req, res) => {
           lng: camp.lng,
           category: camp.category,
           query: `${camp.lat},${camp.lng}`,
-          description: camp.description
+          description: camp.description,
+          isTemporary: true
         });
       });
     }
@@ -316,6 +376,61 @@ export const postMessage = async (req, res) => {
       text: message
     });
 
+    // --- INTENT PARSING FOR CAMP GUIDED WORKFLOW ---
+    const q = message.toLowerCase();
+    const isActiveCampsQuery = q.includes('active camp') || q.includes('temporary camp') || q.includes('camp list') || q.includes('all shivir') || q.includes('active shivir') ||
+                               q.includes('सक्रिय शिविर') || q.includes('अस्थायी शिविर') || q.includes('शिविरों की सूची') || q.includes('sabhi shivir') || q.includes('shivir list');
+                               
+    const hasStay = q.includes('stay') || q.includes('accommodation') || q.includes('aawas') || q.includes('thaharne') || q.includes('rukne') || q.includes('आवास') || q.includes('ठहरने') || q.includes('रुकने');
+    const hasMedical = q.includes('medical') || q.includes('hospital') || q.includes('doctor') || q.includes('chikit') || q.includes('dawai') || q.includes('dawa') || q.includes('health') || q.includes('चिकित्सा') || q.includes('स्वास्थ्य') || q.includes('अस्पताल') || q.includes('इलाज') || q.includes('दवाई') || q.includes('डॉक्टर');
+    const hasFood = q.includes('food') || q.includes('langar') || q.includes('bhandara') || q.includes('khana') || q.includes('doodh') || q.includes('dudh') || q.includes('milk') || q.includes('भोजन') || q.includes('लंगर') || q.includes('भंडारा') || q.includes('खाना') || q.includes('दूध') || q.includes('प्रसाद');
+    const hasTransport = q.includes('transport') || q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('stand') || q.includes('gaadi') || q.includes('vahan') || q.includes('परिवहन') || q.includes('बस') || q.includes('गाड़ी') || q.includes('वाहन') || q.includes('स्टैंड');
+    const hasAtm = q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise') || q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा');
+    
+    const hasSpecificCampCategory = hasStay || hasMedical || hasFood || hasTransport || hasAtm;
+
+    // A: Bypassing logic for general Camp requests to offer interactive selection
+    if (isActiveCampsQuery && !hasSpecificCampCategory) {
+      const guidedReply = `जय श्री राम! 🙏 बाबा बासुकीनाथ धाम में श्रद्धालुओं की सेवा के लिए कई प्रकार के अस्थायी शिविर (Temporary Camps) लगाए गए हैं। 
+
+सही जानकारी के लिए कृपया बताएं कि आपको किस प्रकार के शिविर की आवश्यकता है:
+1. 🏨 **अस्थायी आवास / ठहरने की व्यवस्था (Stay & Accommodation)**
+2. 🏥 **अस्थायी चिकित्सा शिविर (Medical Help & Shivir)**
+3. 🍱 **भोजन / भंडारा / लंगर सेवा (Free Food & Langar)**
+4. 🚌 **अस्थायी परिवहन / बस सेवा (Transport & Bus)**
+5. 🏧 **अस्थायी एटीएम / बैंकिंग (ATM & Banking)**
+
+*(आप नीचे सजेशन बार में से भी सीधे अपनी पसंद की श्रेणी चुन सकते हैं!)*`;
+
+      const botMsg = await Message.create({
+        sessionId,
+        userId: req.user.id,
+        sender: 'bot',
+        text: guidedReply
+      });
+
+      return res.json({
+        userMessage: userMsg,
+        botMessage: botMsg,
+        reply: guidedReply
+      });
+    }
+
+    // B: If a specific category was requested, filter activeLocalPlaces strictly to keep context highly focused!
+    let finalPlacesList = [...activeLocalPlaces];
+    if (isActiveCampsQuery && hasSpecificCampCategory) {
+      let matchedCampCategory = null;
+      if (hasStay) matchedCampCategory = 'stay';
+      else if (hasMedical) matchedCampCategory = 'medical';
+      else if (hasFood) matchedCampCategory = 'food';
+      else if (hasTransport) matchedCampCategory = 'transport';
+      else if (hasAtm) matchedCampCategory = 'atm';
+
+      if (matchedCampCategory) {
+        finalPlacesList = activeLocalPlaces.filter(p => p.category === matchedCampCategory);
+      }
+    }
+
     // 4. Fetch past messages for history context
     const pastMessages = await Message.find({ sessionId }).sort({ timestamp: 1 }).limit(10);
 
@@ -324,7 +439,7 @@ export const postMessage = async (req, res) => {
 
     if (!apiKey) {
       // 🔸 Fallback simulated offline search engine
-      reply = getSimulatedResponse(message, data, latitude, longitude, activeLocalPlaces);
+      reply = getSimulatedResponse(message, data, latitude, longitude, finalPlacesList);
       await new Promise(resolve => setTimeout(resolve, 800));
     } else {
       // 🔸 Call live Gemini API with context RAG with robust fallback chain
@@ -338,7 +453,7 @@ Devotee's LIVE GPS COORDINATES are available: Latitude ${latitude}, Longitude ${
 The devotee is currently approximately ${distFromTemple} km away from the main Baba Basukinath Temple.
 
 Here are the exact calculated straight-line (GPS) distances from the devotee to important local static amenities and database-saved temporary camps around the temple. You MUST use these exact distance values to answer their queries:
-${activeLocalPlaces.map(p => {
+${finalPlacesList.map(p => {
   const dist = calculateDistance(latitude, longitude, p.lat, p.lng);
   const mapsLink = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${p.query}`;
   return `- **${p.name}**: ${dist} km away from user's current position. Dynamic Route Link: [गूगल मैप्स पर मार्ग देखें](${mapsLink})`;
@@ -355,7 +470,7 @@ Crucial Instructions for Pujari Ji:
         locationContext = `
 Devotee's live GPS coordinates are NOT available (denied or delayed).
 Here are the standard approximate distances from Baba Basukinath Temple (temple coordinates: 24.3850, 87.2514) to important local static amenities and database-saved temporary camps:
-${activeLocalPlaces.map(p => {
+${finalPlacesList.map(p => {
   const distFromTemple = calculateDistance(24.3850, 87.2514, p.lat, p.lng);
   const mapsLink = `https://www.google.com/maps/search/?api=1&query=${p.query}`;
   return `- **${p.name}**: ~${distFromTemple} km from Temple. Maps Search Link: [गूगल मैप्स पर स्थान खोजें](${mapsLink})`;
@@ -386,6 +501,11 @@ ${data.festivals.map(f => `  * ${f.name} (${f.date}): ${f.description}`).join('\
 - Contact Info: ${data.contact}
 - Emergency Helplines & Assistance Numbers:
 ${data.helplines?.map(h => `  * ${h.name}: ${h.number} ${h.description ? `(${h.description})` : ''}`).join('\n') || 'None'}
+- Elderly & Disabled Assistance (वृद्ध एवं दिव्यांग सहायता):
+  * Wheelchairs Pick-up: ${data.disabledAssistance?.wheelchairsAvailable || 'Not Configured'}
+  * Free E-Rickshaw Routes: ${data.disabledAssistance?.eRickshawRoutes || 'Not Configured'}
+  * Special Fast Darshan Entry Gates: ${data.disabledAssistance?.specialEntryGates || 'Not Configured'}
+  * Volunteer Sahayata Helpline Number: ${data.disabledAssistance?.helplineNumber || 'Not Configured'}
 - Additional Dynamic Sections:
 ${data.customSections?.map(cs => `  * ${cs.title}: ${cs.content}`).join('\n') || 'None'}
 
@@ -435,7 +555,7 @@ Instructions:
 
       if (!success) {
         console.warn("⚠️ All live Gemini models failed due to rate-limit/leaked API key. Falling back to simulated offline response...");
-        reply = getSimulatedResponse(message, data, latitude, longitude);
+        reply = getSimulatedResponse(message, data, latitude, longitude, finalPlacesList);
       }
     }
 

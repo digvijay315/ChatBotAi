@@ -86,7 +86,13 @@ const defaultTempleData = {
       number: "101",
       description: "अग्निशमन आपातकाल के लिए (Fire emergencies)"
     }
-  ]
+  ],
+  disabledAssistance: {
+    wheelchairsAvailable: "मुख्य बस स्टैंड और मंदिर न्यास कार्यालय (गेट नंबर 1) पर निशुल्क व्हीलचेयर उपलब्ध हैं।",
+    eRickshawRoutes: "बस स्टैंड से सिंह द्वार तक निशुल्क ई-रिक्शा सेवा सक्रिय है।",
+    specialEntryGates: "70 वर्ष से अधिक आयु के बुजुर्गों और दिव्यांगों के लिए गेट नंबर 3 से सीधे निशुल्क प्रवेश की व्यवस्था है (लाइन में लगने की आवश्यकता नहीं है)।",
+    helplineNumber: "+91-9431301037"
+  }
 };
 
 async function seedDefaultData() {

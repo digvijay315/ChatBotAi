@@ -25,7 +25,13 @@ export default function AdminPanel({
     contact: '',
     customSections: [],
     temporaryCamps: [],
-    helplines: []
+    helplines: [],
+    disabledAssistance: {
+      wheelchairsAvailable: '',
+      eRickshawRoutes: '',
+      specialEntryGates: '',
+      helplineNumber: ''
+    }
   });
   
   const [newTiming, setNewTiming] = useState({ name: '', time: '' });
@@ -47,7 +53,13 @@ export default function AdminPanel({
         ...templeData,
         customSections: templeData.customSections || [],
         temporaryCamps: templeData.temporaryCamps || [],
-        helplines: templeData.helplines || []
+        helplines: templeData.helplines || [],
+        disabledAssistance: templeData.disabledAssistance || {
+          wheelchairsAvailable: '',
+          eRickshawRoutes: '',
+          specialEntryGates: '',
+          helplineNumber: ''
+        }
       });
     }
   }, [templeData]);
@@ -606,7 +618,13 @@ export default function AdminPanel({
               number: "101",
               description: "अग्निशमन आपातकाल के लिए (Fire emergencies)"
             }
-          ]
+          ],
+          disabledAssistance: {
+            wheelchairsAvailable: "मुख्य बस स्टैंड और मंदिर न्यास कार्यालय (गेट नंबर 1) पर निशुल्क व्हीलचेयर उपलब्ध हैं।",
+            eRickshawRoutes: "बस स्टैंड से सिंह द्वार तक निशुल्क ई-रिक्शा सेवा सक्रिय है।",
+            specialEntryGates: "70 वर्ष से अधिक आयु के बुजुर्गों और दिव्यांगों के लिए गेट नंबर 3 से सीधे निशुल्क प्रवेश की व्यवस्था है (लाइन में लगने की आवश्यकता नहीं है)।",
+            helplineNumber: "+91-9431301037"
+          }
         };
         
         setFormData(defaultTempleData);
@@ -1391,6 +1409,105 @@ export default function AdminPanel({
               <Plus className="w-3.5 h-3.5 stroke-[3]" />
               <span>{t('adminAddHelplineBtn', language)}</span>
             </button>
+          </div>
+        </div>
+
+        {/* Section 9: Disabled & Elderly Assistance */}
+        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+          isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
+        }`}>
+          <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500">
+            {t('adminSec9', language)}
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="wheelchairs-input">
+                {t('adminWheelchairs', language)}
+              </label>
+              <textarea
+                id="wheelchairs-input"
+                value={formData.disabledAssistance?.wheelchairsAvailable || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  disabledAssistance: {
+                    ...(prev.disabledAssistance || {}),
+                    wheelchairsAvailable: e.target.value
+                  }
+                }))}
+                rows={2}
+                className={`w-full px-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors text-xs font-semibold leading-relaxed ${
+                  isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                }`}
+                placeholder="e.g. Free wheelchairs are available at Gate 1 and Main Bus Stand."
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="rickshaw-input">
+                {t('adminRickshaw', language)}
+              </label>
+              <textarea
+                id="rickshaw-input"
+                value={formData.disabledAssistance?.eRickshawRoutes || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  disabledAssistance: {
+                    ...(prev.disabledAssistance || {}),
+                    eRickshawRoutes: e.target.value
+                  }
+                }))}
+                rows={2}
+                className={`w-full px-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors text-xs font-semibold leading-relaxed ${
+                  isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                }`}
+                placeholder="e.g. Free E-Rickshaw service is active from the bus stand to the temple entrance."
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="special-gates-input">
+                {t('adminSpecialGates', language)}
+              </label>
+              <textarea
+                id="special-gates-input"
+                value={formData.disabledAssistance?.specialEntryGates || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  disabledAssistance: {
+                    ...(prev.disabledAssistance || {}),
+                    specialEntryGates: e.target.value
+                  }
+                }))}
+                rows={2}
+                className={`w-full px-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors text-xs font-semibold leading-relaxed ${
+                  isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                }`}
+                placeholder="e.g. Elderly (>70 yrs) and disabled devotees have direct free entry via Gate 3."
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="assist-helpline-input">
+                {t('adminVolunteerHelpline', language)}
+              </label>
+              <input
+                id="assist-helpline-input"
+                type="text"
+                value={formData.disabledAssistance?.helplineNumber || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  disabledAssistance: {
+                    ...(prev.disabledAssistance || {}),
+                    helplineNumber: e.target.value
+                  }
+                }))}
+                className={`w-full px-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors text-xs font-semibold leading-relaxed ${
+                  isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                }`}
+                placeholder="e.g. +91-9431301037"
+              />
+            </div>
           </div>
         </div>
 

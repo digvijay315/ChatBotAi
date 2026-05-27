@@ -15,6 +15,7 @@ export default function ChatArea({
   const [isListening, setIsListening] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [micSupported, setMicSupported] = useState(true);
+  const [chatFlow, setChatFlow] = useState('default'); // 'default' or 'camps'
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -112,8 +113,19 @@ export default function ChatArea({
   };
 
   // Quick Prompt buttons handler
-  const handleQuickQuestion = (question) => {
+  const handleQuickQuestion = (question, isBack = false) => {
     chimeBell();
+    if (isBack) {
+      setChatFlow('default');
+      return;
+    }
+    
+    if (question === t('quickCampsQuery', language)) {
+      setChatFlow('camps');
+    } else {
+      setChatFlow('default');
+    }
+    
     onSendMessage(question);
   };
 
@@ -137,8 +149,22 @@ export default function ChatArea({
     { text: t('quickHospitals', language), query: t('quickHospitalsQuery', language) },
     { text: t('quickAshrams', language), query: t('quickAshramsQuery', language) },
     { text: t('quickTransport', language), query: t('quickTransportQuery', language) },
-    { text: t('quickATMs', language), query: t('quickATMsQuery', language) }
+    { text: t('quickATMs', language), query: t('quickATMsQuery', language) },
+    { text: t('quickDisabled', language), query: t('quickDisabledQuery', language) },
+    { text: t('quickCamps', language), query: t('quickCampsQuery', language) },
+    { text: t('quickEmergency', language), query: t('quickEmergencyQuery', language) }
   ];
+
+  const campCategories = [
+    { text: language === 'hi' ? "🏨 आवास शिविर" : "🏨 Stay Camps", query: language === 'hi' ? "सक्रिय अस्थायी आवास शिविर दिखाओ" : "Show active stay accommodation camps" },
+    { text: language === 'hi' ? "🏥 चिकित्सा शिविर" : "🏥 Medical Camps", query: language === 'hi' ? "सक्रिय अस्थायी चिकित्सा शिविर दिखाओ" : "Show active medical camps" },
+    { text: language === 'hi' ? "🍱 भोजन/लंगर" : "🍱 Food & Langar", query: language === 'hi' ? "सक्रिय अस्थायी भोजन और लंगर शिविर दिखाओ" : "Show active food camps" },
+    { text: language === 'hi' ? "🚌 परिवहन शिविर" : "🚌 Transport Camps", query: language === 'hi' ? "सक्रिय अस्थायी परिवहन शिविर दिखाओ" : "Show active transport camps" },
+    { text: language === 'hi' ? "🏧 एटीएम शिविर" : "🏧 ATM Camps", query: language === 'hi' ? "सक्रिय अस्थायी एटीएम शिविर दिखाओ" : "Show active ATM camps" },
+    { text: language === 'hi' ? "⬅️ वापस" : "⬅️ Go Back", query: null, isBack: true }
+  ];
+
+  const activeQuestions = chatFlow === 'camps' ? campCategories : quickQuestions;
 
   return (
     <div className="flex flex-col h-[75vh] md:h-[80vh] rounded-[28px] overflow-hidden shadow-lg border border-orange-100/50 dark:border-stone-850">
@@ -216,10 +242,10 @@ export default function ChatArea({
                 {t('quickPromptsHeader', language)}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-left">
-                {quickQuestions.map((q, idx) => (
+                {activeQuestions.map((q, idx) => (
                   <button
                     key={idx}
-                    onClick={() => handleQuickQuestion(q.query)}
+                    onClick={() => handleQuickQuestion(q.query, q.isBack)}
                     className={`p-3.5 rounded-2xl border text-[11px] text-stone-700 dark:text-stone-300 font-bold hover:border-saffron-400 hover:shadow-saffron-glow transition-all flex items-center justify-between group active:scale-[0.98] ${
                       isDarkMode ? 'bg-stone-900 border-stone-850' : 'bg-white border-orange-100'
                     }`}
@@ -266,10 +292,10 @@ export default function ChatArea({
         <div className={`px-4 py-2.5 flex gap-1.5 overflow-x-auto border-t scrollbar-thin shrink-0 ${
           isDarkMode ? 'bg-stone-950 border-stone-850' : 'bg-orange-50/5 border-orange-100/50'
         }`}>
-          {quickQuestions.map((q, idx) => (
+          {activeQuestions.map((q, idx) => (
             <button
               key={idx}
-              onClick={() => handleQuickQuestion(q.query)}
+              onClick={() => handleQuickQuestion(q.query, q.isBack)}
               className={`px-3 py-1.5 rounded-full border text-[10px] font-bold whitespace-nowrap hover:border-saffron-400 active:scale-[0.98] transition-all ${
                 isDarkMode 
                   ? 'bg-stone-900 border-stone-850 text-stone-300' 

@@ -39,7 +39,7 @@ export default function ChatDashboardPage() {
 
   return (
     <div className={isDarkMode ? 'dark' : ''}>
-      <div className={`min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-6 transition-colors duration-300 ${
+      <div className={`min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 transition-colors duration-300 ${
         isDarkMode 
           ? 'saffron-gradient-dark text-stone-100 bg-stone-950' 
           : 'saffron-gradient text-stone-800'
@@ -104,6 +104,11 @@ export default function ChatDashboardPage() {
           </main>
 
         </div>
+
+        {/* Powered by DIRD Footer */}
+        <footer className="text-center py-4 text-[11px] font-extrabold uppercase tracking-widest text-stone-500 dark:text-stone-400 transition-colors animate-fadeIn mt-4 select-none">
+          Powered by <span className="text-saffron-600 dark:text-saffron-400 font-black">DIRD India Pvt Ltd</span>
+        </footer>
 
       </div>
     </div>

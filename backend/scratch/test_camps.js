@@ -36,7 +36,7 @@ async function runTest() {
 
     // 3. Create Chat Session
     console.log('\n➡️ Step 3: Creating a new Devotee Chat Session...');
-    const sessionRes = await fetch(`${BACKEND_URL}/chat/sessions`, {
+    const sessionRes = await fetch(`${BACKEND_URL}/sessions/new`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ async function runTest() {
     const templeGetRes = await fetch(`${BACKEND_URL}/temple-data`);
     const templeGetData = await templeGetRes.json();
     if (!templeGetRes.ok) throw new Error(`Fetch temple data failed: ${JSON.stringify(templeGetData)}`);
-    const templeBaseData = templeGetData.data;
+    const templeBaseData = templeGetData;
     console.log(`✅ Current temple data fetched: "${templeBaseData.name}"`);
 
     // Save original camps to restore later
@@ -104,6 +104,32 @@ async function runTest() {
     const templeUpdateData = await templeUpdateRes.json();
     if (!templeUpdateRes.ok) throw new Error(`Admin save failed: ${JSON.stringify(templeUpdateData)}`);
     console.log('✅ Temporary Camp injected successfully to MongoDB!');
+
+    // 6.5. Devotee Queries general Camps (to verify guided choice)
+    console.log('\n➡️ Step 6.5: Querying Chatbot generally for active camps (should return Category Guided Menu)...');
+    const generalRes = await fetch(`${BACKEND_URL}/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${devoteeToken}`
+      },
+      body: JSON.stringify({
+        message: "सक्रिय अस्थायी शिविर ⛺",
+        sessionId: sessionId
+      })
+    });
+    const generalData = await generalRes.json();
+    if (!generalRes.ok) throw new Error(`General camps query failed: ${JSON.stringify(generalData)}`);
+    console.log('\n--- PUJARI JI GENERAL CAMPS RESPONSE ---');
+    console.log(generalData.reply);
+    console.log('-----------------------------------------\n');
+    
+    const containsGuidedMenu = generalData.reply.includes("आवास") && generalData.reply.includes("चिकित्सा") && generalData.reply.includes("भोजन");
+    if (containsGuidedMenu) {
+      console.log('✅ Success: Pujari Ji returned the guided category selection menu successfully!');
+    } else {
+      throw new Error('Failure: Pujari Ji did not return guided menu for general camp query.');
+    }
 
     // 7. Devotee Queries Chatbot with Geolocation Fallback
     console.log('\n➡️ Step 7: Chatting with Pujari Ji about nearby food/langar camps with devotee live GPS coordinates...');

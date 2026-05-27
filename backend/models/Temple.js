@@ -32,7 +32,13 @@ const TempleSchema = new mongoose.Schema({
     name: { type: String, required: true },
     number: { type: String, required: true },
     description: { type: String }
-  }]
+  }],
+  disabledAssistance: {
+    wheelchairsAvailable: { type: String, default: "" },
+    eRickshawRoutes: { type: String, default: "" },
+    specialEntryGates: { type: String, default: "" },
+    helplineNumber: { type: String, default: "" }
+  }
 }, { timestamps: true });
 
 export default mongoose.model('Temple', TempleSchema);

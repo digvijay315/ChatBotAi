@@ -127,7 +127,18 @@ export const translations = {
     adminAddHelplineName: "Helpline Name/Title (e.g. Police Station Jarmundi)",
     adminAddHelplineNumber: "Phone Number (e.g. +91-XXXXX or 100)",
     adminAddHelplineDesc: "Short Description / Details (Optional)",
-    adminAddHelplineBtn: "Add Helpline Contact"
+    adminAddHelplineBtn: "Add Helpline Contact",
+    quickDisabled: "Disabled & Elderly Help ♿",
+    quickCamps: "Active Camps ⛺",
+    quickCampsQuery: "Show the list of all active temporary camps and shivirs around the temple",
+    quickDisabledQuery: "What facilities are available for elderly and disabled devotees?",
+    quickEmergency: "Emergency Contacts 🚨",
+    quickEmergencyQuery: "Show emergency helplines and assistance contact numbers around the temple",
+    adminSec9: "9. Disabled & Elderly Assistance",
+    adminWheelchairs: "Free Wheelchairs Availability Details",
+    adminRickshaw: "Free E-Rickshaw Routes Details",
+    adminSpecialGates: "Special Fast Darshan Entry Gates",
+    adminVolunteerHelpline: "Volunteer / Stretcher Assistance Helpline"
   },
   hi: {
     title: "मंदिर AI",
@@ -257,7 +268,18 @@ export const translations = {
     adminAddHelplineName: "हेल्पलाइन का नाम/शीर्षक (जैसे: पुलिस थाना जरमुंडी)",
     adminAddHelplineNumber: "फ़ोन नंबर (जैसे: +91-XXXXX या 100)",
     adminAddHelplineDesc: "संक्षिप्त विवरण / अन्य विवरण (वैकल्पिक)",
-    adminAddHelplineBtn: "हेल्पलाइन संपर्क जोड़ें"
+    adminAddHelplineBtn: "हेल्पलाइन संपर्क जोड़ें",
+    quickDisabled: "वृद्ध एवं दिव्यांग सहायता ♿",
+    quickCamps: "सक्रिय अस्थायी शिविर ⛺",
+    quickCampsQuery: "मंदिर के आसपास सक्रिय सभी अस्थायी शिविरों और लंगर की सूची दिखाओ",
+    quickDisabledQuery: "बुजुर्गों और दिव्यांगों के लिए क्या विशेष सुविधाएं हैं?",
+    quickEmergency: "आपातकालीन हेल्पलाइन 🚨",
+    quickEmergencyQuery: "मंदिर के आसपास आपातकालीन हेल्पलाइन नंबर और सहायता नंबर दिखाओ",
+    adminSec9: "9. वृद्ध एवं दिव्यांग सहायता गाइड",
+    adminWheelchairs: "निशुल्क व्हीलचेयर सेवा विवरण",
+    adminRickshaw: "निशुल्क ई-रिक्शा रूट विवरण",
+    adminSpecialGates: "विशेष सीधे दर्शन प्रवेश द्वार नियम",
+    adminVolunteerHelpline: "स्वयंसेवक / स्ट्रेचर सहायता हेल्पलाइन"
   }
 };
 
