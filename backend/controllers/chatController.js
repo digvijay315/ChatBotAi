@@ -41,25 +41,80 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
 
   let reply = `प्रणाम भक्तगण! 🙏 मैं ${name} का डिजिटल मार्गदर्शक हूँ। `;
 
-  // 1. Live Amenities / Facilities Search
-  if (q.includes('hotel') || q.includes('dharamshala') || q.includes('stay') || q.includes('rukne') || q.includes('lodg') || 
-      q.includes('hospital') || q.includes('ill') || q.includes('doctor') || q.includes('chikit') || q.includes('dawai') || 
-      q.includes('petrol') || q.includes('pump') || q.includes('fuel') || q.includes('tel') || 
-      q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('train') || q.includes('stand') || 
-      q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise nikalne') ||
-      q.includes('aashram') || q.includes('ashram') || q.includes('camp') || q.includes('shivir') || q.includes('bhandara') || q.includes('langar')) {
+  // Check categories with Latin/English/Hinglish and Hindi Devanagari keywords
+  const isHotelQuery = q.includes('hotel') || q.includes('dharamshala') || q.includes('stay') || q.includes('rukne') || q.includes('lodg') || q.includes('aashram') || q.includes('ashram') ||
+                       q.includes('होटल') || q.includes('धर्मशाला') || q.includes('रुकने') || q.includes('ठहरने') || q.includes('लॉज') || q.includes('आश्रम');
+                       
+  const isHospitalQuery = q.includes('hospital') || q.includes('ill') || q.includes('doctor') || q.includes('chikit') || q.includes('dawai') || q.includes('medical') ||
+                          q.includes('अस्पताल') || q.includes('हॉस्पिटल') || q.includes('बीमार') || q.includes('डॉक्टर') || q.includes('चिकित्सा') || q.includes('दवाई') || q.includes('मेडिकल');
+                          
+  const isPetrolQuery = q.includes('petrol') || q.includes('pump') || q.includes('fuel') || q.includes('tel') ||
+                        q.includes('पेट्रोल') || q.includes('पंप') || q.includes('ईंधन') || q.includes('तेल');
+                        
+  const isTransportQuery = q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('train') || q.includes('stand') || q.includes('transport') ||
+                           q.includes('बस') || q.includes('रेलवे') || q.includes('स्टेशन') || q.includes('ट्रेन') || q.includes('स्टैंड') || q.includes('परिवहन') || q.includes('गाड़ी') || q.includes('गाडी');
+                           
+  const isAtmQuery = q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise nikalne') ||
+                     q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा') || q.includes('पैसे');
+                     
+  const isFoodQuery = q.includes('bhandara') || q.includes('langar') || q.includes('food') || q.includes('khana') ||
+                      q.includes('भंडारा') || q.includes('लंगर') || q.includes('भोजन') || q.includes('खाना') || q.includes('प्रसाद');
+                      
+  const isCampQuery = q.includes('camp') || q.includes('shivir') ||
+                      q.includes('शिविर') || q.includes('कैंप');
+
+  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery ||
+                            q.includes('facility') || q.includes('suvidha') || q.includes('nearby') || q.includes('paas') ||
+                            q.includes('सुविधा') || q.includes('पास') || q.includes('नजदीक');
+
+  if (isAmenitiesSearch) {
+    let targetCategories = [];
+    let facilityName = "जन-सुविधाओं और शिविरों";
+
+    if (isHotelQuery) {
+      targetCategories = ['hotel', 'ashram', 'stay'];
+      facilityName = "ठहरने की उत्तम व्यवस्था (होटल, धर्मशाला और आश्रम)";
+    } else if (isHospitalQuery) {
+      targetCategories = ['hospital', 'medical'];
+      facilityName = "स्वास्थ्य सुविधाओं और चिकित्सा शिविरों";
+    } else if (isPetrolQuery) {
+      targetCategories = ['petrol_pump'];
+      facilityName = "पेट्रोल पंप और ईंधन स्टेशनों";
+    } else if (isTransportQuery) {
+      targetCategories = ['bus_stand', 'railway_station', 'transport'];
+      facilityName = "परिवहन सुविधाओं (बस स्टैंड और रेलवे स्टेशन)";
+    } else if (isAtmQuery) {
+      targetCategories = ['atm'];
+      facilityName = "एटीएम और बैंकिंग सेवाओं";
+    } else if (isFoodQuery) {
+      targetCategories = ['food'];
+      facilityName = "भोजन और लंगर शिविरों";
+    } else if (isCampQuery) {
+      targetCategories = ['stay', 'medical', 'food', 'hospital'];
+      facilityName = "अस्थायी शिविरों (आवास, स्वास्थ्य और भोजन)";
+    }
+
+    const filteredPlaces = targetCategories.length > 0 
+      ? placesList.filter(p => targetCategories.includes(p.category))
+      : placesList;
+
+    reply += `यहाँ आपके सबसे पास की ${facilityName} की जानकारी दी गई है। `;
     
-    reply += `यहाँ आपके सबसे पास की जन-सुविधाओं और शिविरों की जानकारी दी गई है। `;
+    if (filteredPlaces.length === 0) {
+      reply += `वर्तमान में इस श्रेणी की कोई सुविधा उपलब्ध नहीं है।`;
+      return reply;
+    }
+
     if (latitude && longitude) {
       reply += `आपके लाइव स्थान (Live GPS) के अनुसार दूरी:\n\n`;
-      placesList.forEach(p => {
+      filteredPlaces.forEach(p => {
         const dist = calculateDistance(latitude, longitude, p.lat, p.lng);
         const routeLink = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${p.query}`;
         reply += `📍 **${p.name}**:\n   - **दूरी**: ${dist} किमी दूर\n   - **दिशा-निर्देश**: [Google Maps पर रास्ता देखें](${routeLink})\n\n`;
       });
     } else {
       reply += `मुख्य मंदिर से इन सुविधाओं की दूरी इस प्रकार है (अपने लाइव स्थान से दूरी देखने के लिए कृपया ब्राउज़र में लोकेशन की अनुमति दें):\n\n`;
-      placesList.forEach(p => {
+      filteredPlaces.forEach(p => {
         const dist = calculateDistance(24.3850, 87.2514, p.lat, p.lng);
         const routeLink = `https://www.google.com/maps/search/?api=1&query=${p.query}`;
         reply += `📍 **${p.name}**:\n   - **मंदिर से दूरी**: लगभग ${dist} किमी\n   - **गूगल मैप्स**: [यहाँ खोजें](${routeLink})\n\n`;
@@ -354,11 +409,11 @@ Instructions:
       fullPrompt += `\nLatest devotee question: ${message}\nAnswer:`;
 
       const modelNames = [
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-pro",
         "gemini-2.5-flash",
-        "gemini-2.0-flash-lite",
-        "gemini-3.1-flash-lite",
-        "gemini-3.5-flash",
-        "gemini-2.5-pro"
+        "gemini-2.0-flash-lite"
       ];
 
       let success = false;
