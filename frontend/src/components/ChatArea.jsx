@@ -161,6 +161,7 @@ export default function ChatArea({
     { text: language === 'hi' ? "🍱 भोजन/लंगर" : "🍱 Food & Langar", query: language === 'hi' ? "सक्रिय अस्थायी भोजन और लंगर शिविर दिखाओ" : "Show active food camps" },
     { text: language === 'hi' ? "🚌 परिवहन शिविर" : "🚌 Transport Camps", query: language === 'hi' ? "सक्रिय अस्थायी परिवहन शिविर दिखाओ" : "Show active transport camps" },
     { text: language === 'hi' ? "🏧 एटीएम शिविर" : "🏧 ATM Camps", query: language === 'hi' ? "सक्रिय अस्थायी एटीएम शिविर दिखाओ" : "Show active ATM camps" },
+    { text: language === 'hi' ? "💵 त्वरित कैश सेवा" : "💵 Instant Cash", query: language === 'hi' ? "सक्रिय अस्थायी त्वरित कैश सेवा शिविर दिखाओ" : "Show active instant cash camps" },
     { text: language === 'hi' ? "⬅️ वापस" : "⬅️ Go Back", query: null, isBack: true }
   ];
 

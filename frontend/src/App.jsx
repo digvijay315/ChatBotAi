@@ -14,15 +14,8 @@ export default function App() {
           {/* Unprotected Route: Registration & Login Tabs */}
           <Route path="/auth" element={<AuthPage />} />
 
-          {/* Protected Route: Devotee Chat Area (Devotee & Admins allowed) */}
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <ChatDashboardPage />
-              </ProtectedRoute>
-            } 
-          />
+          {/* Unprotected Route: Devotee Chat Area (Devotee & Admins allowed) */}
+          <Route path="/" element={<ChatDashboardPage />} />
 
           {/* Protected Route: Temple Details Admin Panel (Strictly Admin only) */}
           <Route 

@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import Sidebar from '../components/Sidebar';
 import ChatArea from '../components/ChatArea';
 import { t } from '../utils/translations';
+import shivlingImg from '../assets/shivling.png';
 
 export default function ChatDashboardPage() {
   const {
@@ -27,6 +28,23 @@ export default function ChatDashboardPage() {
   } = useApp();
 
   const navigate = useNavigate();
+
+  if (!token || !user) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 ${
+        isDarkMode ? 'bg-stone-950 text-stone-100 saffron-gradient-dark' : 'bg-orange-50/30 text-stone-800 saffron-gradient'
+      }`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-16 h-16 bg-gradient-to-br from-saffron-500 to-amber-600 rounded-3xl overflow-hidden shadow-lg flex items-center justify-center p-0.5 animate-pulse">
+            <img src={shivlingImg} alt="Shivling Loading" className="w-full h-full object-cover rounded-[22px]" />
+          </div>
+          <p className="text-sm font-semibold text-saffron-600 dark:text-saffron-400 font-spiritual animate-pulse">
+            ॐ नमः शिवाय... (आरंभ हो रहा है)
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Backward compatible adapter to convert tab clicks into route navigation!
   const handleTabSwitch = (tab) => {
@@ -84,12 +102,14 @@ export default function ChatDashboardPage() {
                 </p>
               </div>
 
-              {/* Show login status info */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] px-3 py-1 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full font-bold text-stone-600 dark:text-stone-400">
-                  👤 {user?.name} ({user?.role === 'admin' ? t('adminTitle', language) : t('userRegisterTab', language)})
-                </span>
-              </div>
+              {/* Show login status info for Admin */}
+              {user?.role === 'admin' && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] px-3 py-1 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full font-bold text-stone-600 dark:text-stone-400">
+                    ⚙️ Admin Panel Active
+                  </span>
+                </div>
+              )}
             </header>
 
             {/* Devotee Chat Area */}

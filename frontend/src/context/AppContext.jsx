@@ -50,6 +50,39 @@ export function AppContextProvider({ children }) {
     fetchTempleData();
   }, []);
 
+  // Automatic Guest Login for Standard Devotees
+  useEffect(() => {
+    const autoGuestLogin = async () => {
+      // Check if we already have a valid token (admin or guest)
+      const existingToken = localStorage.getItem('token');
+      if (existingToken) return;
+
+      try {
+        console.log('🔄 Attempting silent guest login for devotee...');
+        // Generate or retrieve deviceId
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+          deviceId = `dev_${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+          localStorage.setItem('deviceId', deviceId);
+        }
+
+        const response = await api.post('/auth/guest-login', { deviceId });
+        const resData = response.data;
+        
+        localStorage.setItem('token', resData.token);
+        localStorage.setItem('user', JSON.stringify(resData.user));
+        
+        setToken(resData.token);
+        setUser(resData.user);
+        console.log('✅ Silent guest login successful!');
+      } catch (err) {
+        console.error('❌ Silent guest login failed:', err);
+      }
+    };
+
+    autoGuestLogin();
+  }, []);
+
   // Fetch User Chat Sessions
   const fetchSessions = async (authToken, authUser) => {
     const currentToken = authToken || token;

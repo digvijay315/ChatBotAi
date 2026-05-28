@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { t } from '../utils/translations';
-import { Mail, Lock, User as UserIcon, Landmark, Globe } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Globe } from 'lucide-react';
 import api from '../utils/api';
+import shivlingImg from '../assets/shivling.png';
 
 export default function AuthPage() {
   const { 
@@ -17,21 +18,21 @@ export default function AuthPage() {
     fetchSessions
   } = useApp();
   
-  const navigate = useNavigate();
-
-  // Route Guard: If already authenticated, redirect to workspace immediately
-  if (token && user) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace />;
-  }
-
   // --- LOCAL FORM STATES ---
-  const [authTab, setAuthTab] = useState('login'); // 'login' | 'register' | 'admin'
+  const [authTab, setAuthTab] = useState('admin'); // Only 'admin' now!
   const [regName, setRegName] = useState('');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  // Route Guard: If already authenticated as admin, redirect to admin dashboard immediately
+  if (token && user && user.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
 
   // --- FORM HANDLER ---
   const handleAuthSubmit = async (e) => {
@@ -108,51 +109,17 @@ export default function AuthPage() {
         
         {/* Brand Logo */}
         <div className="flex justify-center mb-4">
-          <div className="p-4 bg-gradient-to-br from-saffron-500 to-amber-600 rounded-3xl text-white shadow-lg float-animation">
-            <Landmark className="w-10 h-10" />
+          <div className="w-20 h-20 bg-gradient-to-br from-saffron-500 to-amber-600 rounded-3xl overflow-hidden text-white shadow-lg float-animation flex items-center justify-center p-0.5">
+            <img src={shivlingImg} alt="Shivling Logo" className="w-full h-full object-cover rounded-[22px]" />
           </div>
         </div>
 
         <h1 className="text-2xl font-bold text-center font-spiritual text-saffron-500 mb-1">
-          {t('userAuthTitle', language)}
+          {language === 'hi' ? 'प्रशासनिक लॉगिन' : 'Admin Login'}
         </h1>
-        <p className="text-stone-500 dark:text-stone-400 text-center text-xs mb-6 px-4">
-          {t('userAuthSubtitle', language)}
+        <p className="text-stone-500 dark:text-stone-400 text-center text-xs mb-6 px-4 font-semibold">
+          {language === 'hi' ? 'केवल मंदिर एडमिनिस्ट्रेशन के उपयोग के लिए' : 'For temple administration use only'}
         </p>
-
-        {/* Tab Selector */}
-        <div className="flex bg-stone-100 dark:bg-stone-900/60 p-1.5 rounded-2xl mb-6">
-          <button
-            onClick={() => { setAuthTab('login'); setAuthError(''); setAuthSuccess(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              authTab === 'login' 
-                ? 'bg-white dark:bg-stone-800 shadow-sm text-saffron-600 dark:text-saffron-400' 
-                : 'text-stone-500 dark:text-stone-400'
-            }`}
-          >
-            {t('userLoginTab', language)}
-          </button>
-          <button
-            onClick={() => { setAuthTab('register'); setAuthError(''); setAuthSuccess(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              authTab === 'register' 
-                ? 'bg-white dark:bg-stone-800 shadow-sm text-saffron-600 dark:text-saffron-400' 
-                : 'text-stone-500 dark:text-stone-400'
-            }`}
-          >
-            {t('userRegisterTab', language)}
-          </button>
-          <button
-            onClick={() => { setAuthTab('admin'); setAuthError(''); setAuthSuccess(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              authTab === 'admin' 
-                ? 'bg-white dark:bg-stone-800 shadow-sm text-saffron-600 dark:text-saffron-400' 
-                : 'text-stone-500 dark:text-stone-400'
-            }`}
-          >
-            {t('adminTitle', language)}
-          </button>
-        </div>
 
         {/* Action Error Alerts */}
         {authError && (
@@ -242,22 +209,18 @@ export default function AuthPage() {
         </form>
 
         {/* Quick toggles */}
-        <div className="mt-6 pt-4 border-t border-orange-100/50 dark:border-stone-800 text-center">
-          {authTab === 'login' && (
-            <button onClick={() => setAuthTab('register')} className="text-xs font-semibold text-saffron-500 hover:underline">
-              {t('userNoAccount', language)}
-            </button>
-          )}
-          {authTab === 'register' && (
-            <button onClick={() => setAuthTab('login')} className="text-xs font-semibold text-saffron-500 hover:underline">
-              {t('userHaveAccount', language)}
-            </button>
-          )}
-          {authTab === 'admin' && (
-            <p className="text-[10px] text-stone-400 font-semibold leading-relaxed">
-              Hint: admin@gmail.com / admin@123
-            </p>
-          )}
+        <div className="mt-6 pt-4 border-t border-orange-100/50 dark:border-stone-800 text-center flex flex-col gap-3 items-center">
+          <button 
+            type="button"
+            onClick={() => navigate('/')} 
+            className="text-xs font-bold text-saffron-500 hover:text-saffron-600 border border-saffron-200 hover:border-saffron-300 dark:border-stone-800 dark:hover:border-stone-700 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95 bg-transparent"
+          >
+            {language === 'hi' ? '🕉️ भक्त चैट बोर्ड पर जाएं (Go to Chatboard)' : '🕉️ Go to Devotee Chatboard'}
+          </button>
+          
+          <p className="text-[10px] text-stone-400 font-semibold leading-relaxed">
+            Hint: admin@gmail.com / admin@123
+          </p>
         </div>
 
         {/* Powered by DIRD Footer */}

@@ -1130,7 +1130,7 @@ export default function AdminPanel({
                       <span className="font-extrabold text-stone-700 dark:text-stone-300 text-sm flex items-center gap-2">
                         {camp.name}
                         <span className="text-[10px] px-2 py-0.5 bg-saffron-100 text-saffron-800 dark:bg-saffron-950/40 dark:text-saffron-400 rounded-full font-bold uppercase">
-                          {t(`adminCategory${camp.category.charAt(0).toUpperCase() + camp.category.slice(1)}`, language)}
+                          {t(camp.category === 'instant_cash' ? 'adminCategoryInstantCash' : `adminCategory${camp.category.charAt(0).toUpperCase() + camp.category.slice(1)}`, language)}
                         </span>
                       </span>
                       <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold mt-1">
@@ -1193,6 +1193,7 @@ export default function AdminPanel({
                   <option value="food">{t('adminCategoryFood', language)}</option>
                   <option value="transport">{t('adminCategoryTransport', language)}</option>
                   <option value="atm">{t('adminCategoryAtm', language)}</option>
+                  <option value="instant_cash">{t('adminCategoryInstantCash', language)}</option>
                 </select>
               </div>
             </div>

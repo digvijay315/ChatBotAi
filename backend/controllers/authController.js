@@ -89,3 +89,37 @@ export const adminLogin = async (req, res) => {
     return res.status(400).json({ error: 'अमान्य एडमिन ईमेल या पासवर्ड!' });
   }
 };
+
+// 4. Guest Devotee Login
+export const guestLogin = async (req, res) => {
+  const { deviceId } = req.body;
+  const guestEmail = deviceId ? `guest_${deviceId}@chatbot.com` : 'guest_global@chatbot.com';
+  
+  try {
+    let guestUser = await User.findOne({ email: guestEmail });
+    if (!guestUser) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('guest@123', salt);
+      guestUser = await User.create({
+        name: 'श्रद्धालु (Devotee)',
+        email: guestEmail,
+        password: hashedPassword,
+        role: 'user'
+      });
+    }
+
+    const token = jwt.sign(
+      { id: guestUser._id, email: guestUser.email, name: guestUser.name, role: 'user' },
+      JWT_SECRET,
+      { expiresIn: '365d' }
+    );
+
+    res.json({
+      message: 'अतिथि लॉगिन सफल!',
+      token,
+      user: { id: guestUser._id, name: guestUser.name, email: guestUser.email, role: 'user' }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'अतिथि लॉगिन विफल रहा।', details: err.message });
+  }
+};

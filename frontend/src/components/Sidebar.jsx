@@ -7,13 +7,13 @@ import {
   Sun, 
   Moon, 
   MapPin, 
-  Landmark, 
   Trash2, 
   LogOut, 
   Plus, 
   Globe 
 } from 'lucide-react';
 import { t } from '../utils/translations';
+import shivlingImg from '../assets/shivling.png';
 
 export default function Sidebar({ 
   templeData, 
@@ -46,8 +46,8 @@ export default function Sidebar({
         
         {/* Temple Brand Logo Header */}
         <div className="flex items-center gap-3 border-b border-orange-100/50 dark:border-stone-800 pb-5 shrink-0">
-          <div className="p-3 bg-gradient-to-br from-saffron-500 to-amber-600 rounded-2xl text-white shadow-md float-animation">
-            <Landmark className="w-6 h-6" />
+          <div className="w-12 h-12 bg-gradient-to-br from-saffron-500 to-amber-600 rounded-2xl overflow-hidden text-white shadow-md float-animation flex items-center justify-center p-0.5">
+            <img src={shivlingImg} alt="Shivling Logo" className="w-full h-full object-cover rounded-[12px]" />
           </div>
           <div>
             <h1 className="text-xl font-bold font-spiritual tracking-wide bg-gradient-to-r from-saffron-600 to-amber-600 bg-clip-text text-transparent dark:from-saffron-400 dark:to-gold-400">
@@ -111,7 +111,7 @@ export default function Sidebar({
         </nav>
 
         {/* Devotee Chat History Sessions list */}
-        {user && (user.role !== 'admin' || activeTab === 'chat') && (
+        {user && user.role === 'admin' && activeTab === 'chat' && (
           <div className="flex-1 flex flex-col min-h-0 space-y-2 pt-2 border-t border-orange-100/50 dark:border-stone-850">
             <div className="flex items-center justify-between shrink-0 px-1">
               <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 dark:text-stone-500">
@@ -233,32 +233,30 @@ export default function Sidebar({
         <div className="flex gap-2">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-[11px] font-bold transition-all active:scale-[0.98] ${
-              isDarkMode 
-                ? 'bg-stone-900 border-stone-800 text-white hover:bg-stone-850' 
-                : 'bg-white border-stone-200 text-stone-700 hover:bg-orange-50/20'
-            }`}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-[11px] font-bold transition-all active:scale-[0.98] bg-white border-stone-200 text-stone-700 hover:bg-orange-50/20 dark:bg-stone-900 dark:border-stone-800 dark:text-white"
           >
             {isDarkMode ? (
               <>
                 <Sun className="w-3.5 h-3.5 text-amber-400 animate-spin-slow" />
-                <span>{t('lightMode', language).split(' ')[0]}</span>
+                <span>{t('lightMode', language)}</span>
               </>
             ) : (
               <>
                 <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                <span>{t('darkMode', language).split(' ')[0]}</span>
+                <span>{t('darkMode', language)}</span>
               </>
             )}
           </button>
 
-          <button
-            onClick={onLogout}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-red-200 dark:border-red-950/40 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 text-[11px] font-bold transition-all active:scale-[0.98]"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>{t('sidebarLogout', language)}</span>
-          </button>
+          {user?.role === 'admin' && (
+            <button
+              onClick={onLogout}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-red-200 dark:border-red-950/40 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 text-[11px] font-bold transition-all active:scale-[0.98]"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>{t('sidebarLogout', language)}</span>
+            </button>
+          )}
         </div>
 
         {/* Technical Footer */}

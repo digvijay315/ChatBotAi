@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, adminLogin } from '../controllers/authController.js';
+import { register, login, adminLogin, guestLogin } from '../controllers/authController.js';
 import { validateBody } from '../middleware/validationMiddleware.js';
 import { registerSchema, loginSchema } from '../validations/authValidation.js';
 
@@ -13,5 +13,8 @@ router.post('/login', validateBody(loginSchema), login);
 
 // 3. Admin Login Route
 router.post('/admin-login', validateBody(loginSchema), adminLogin);
+
+// 4. Guest Devotee Login Route
+router.post('/guest-login', guestLogin);
 
 export default router;

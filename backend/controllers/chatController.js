@@ -68,7 +68,9 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
   const isActiveCampsQuery = q.includes('active camp') || q.includes('temporary camp') || q.includes('camp list') || q.includes('all shivir') || q.includes('active shivir') ||
                              q.includes('सक्रिय शिविर') || q.includes('अस्थायी शिविर') || q.includes('शिविरों की सूची') || q.includes('sabhi shivir') || q.includes('shivir list');
 
-  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery || isActiveCampsQuery ||
+  const isInstantCashQuery = q.includes('instant cash') || q.includes('quick cash') || q.includes('qr cash') || q.includes('qr code cash') || q.includes('cash counter') || q.includes('नकद') || q.includes('कैश');
+
+  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery || isActiveCampsQuery || isInstantCashQuery ||
                             q.includes('facility') || q.includes('suvidha') || q.includes('nearby') || q.includes('paas') ||
                             q.includes('सुविधा') || q.includes('पास') || q.includes('नजदीक');
 
@@ -97,6 +99,9 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
       } else if (q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise') || q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा')) {
         targetCampCategory = 'atm';
         categoryLabel = "अस्थायी एटीएम / बैंकिंग शिविर (ATM Camps)";
+      } else if (q.includes('instant cash') || q.includes('quick cash') || q.includes('qr cash') || q.includes('qr code cash') || q.includes('cash counter') || q.includes('नकद') || q.includes('कैश')) {
+        targetCampCategory = 'instant_cash';
+        categoryLabel = "त्वरित नकद सेवा / QR कोड से कैश (Instant Cash via QR)";
       }
       
       facilityName = `सक्रिय ${categoryLabel}`;
@@ -122,8 +127,8 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
       targetCategories = ['food'];
       facilityName = "भोजन और लंगर शिविरों";
     } else if (isCampQuery) {
-      targetCategories = ['stay', 'medical', 'food', 'hospital'];
-      facilityName = "अस्थायी शिविरों (आवास, स्वास्थ्य और भोजन)";
+      targetCategories = ['stay', 'medical', 'food', 'hospital', 'instant_cash'];
+      facilityName = "अस्थायी शिविरों (आवास, स्वास्थ्य, भोजन और त्वरित कैश)";
     }
 
     let filteredPlaces = targetCategories.length > 0 
@@ -355,9 +360,10 @@ export const postMessage = async (req, res) => {
         else if (camp.category === 'food') categoryEmoji = '🍱';
         else if (camp.category === 'transport') categoryEmoji = '🚌';
         else if (camp.category === 'atm') categoryEmoji = '🏧';
+        else if (camp.category === 'instant_cash') categoryEmoji = '💵';
 
         activeLocalPlaces.push({
-          name: `${camp.name} ${categoryEmoji} (${camp.category === 'stay' ? 'अस्थायी आवास' : camp.category === 'medical' ? 'अस्थायी चिकित्सा शिविर' : camp.category === 'food' ? 'अस्थायी भोजन/लंगर शिविर' : camp.category === 'atm' ? 'एटीएम/बैंक' : 'अस्थायी परिवहन सेवा'}) - ${camp.description}`,
+          name: `${camp.name} ${categoryEmoji} (${camp.category === 'stay' ? 'अस्थायी आवास' : camp.category === 'medical' ? 'अस्थायी चिकित्सा शिविर' : camp.category === 'food' ? 'अस्थायी भोजन/लंगर शिविर' : camp.category === 'atm' ? 'एटीएम/बैंक' : camp.category === 'instant_cash' ? 'त्वरित नकद (QR कोड से कैश)' : 'अस्थायी परिवहन सेवा'}) - ${camp.description}`,
           lat: camp.lat,
           lng: camp.lng,
           category: camp.category,
@@ -386,8 +392,9 @@ export const postMessage = async (req, res) => {
     const hasFood = q.includes('food') || q.includes('langar') || q.includes('bhandara') || q.includes('khana') || q.includes('doodh') || q.includes('dudh') || q.includes('milk') || q.includes('भोजन') || q.includes('लंगर') || q.includes('भंडारा') || q.includes('खाना') || q.includes('दूध') || q.includes('प्रसाद');
     const hasTransport = q.includes('transport') || q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('stand') || q.includes('gaadi') || q.includes('vahan') || q.includes('परिवहन') || q.includes('बस') || q.includes('गाड़ी') || q.includes('वाहन') || q.includes('स्टैंड');
     const hasAtm = q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise') || q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा');
+    const hasInstantCash = q.includes('instant cash') || q.includes('quick cash') || q.includes('qr cash') || q.includes('qr code cash') || q.includes('cash counter') || q.includes('नकद') || q.includes('कैश');
     
-    const hasSpecificCampCategory = hasStay || hasMedical || hasFood || hasTransport || hasAtm;
+    const hasSpecificCampCategory = hasStay || hasMedical || hasFood || hasTransport || hasAtm || hasInstantCash;
 
     // A: Bypassing logic for general Camp requests to offer interactive selection
     if (isActiveCampsQuery && !hasSpecificCampCategory) {
@@ -399,6 +406,7 @@ export const postMessage = async (req, res) => {
 3. 🍱 **भोजन / भंडारा / लंगर सेवा (Free Food & Langar)**
 4. 🚌 **अस्थायी परिवहन / बस सेवा (Transport & Bus)**
 5. 🏧 **अस्थायी एटीएम / बैंकिंग (ATM & Banking)**
+6. 💵 **त्वरित नकद सेवा / QR कोड से कैश (Instant Cash via QR)**
 
 *(आप नीचे सजेशन बार में से भी सीधे अपनी पसंद की श्रेणी चुन सकते हैं!)*`;
 
@@ -425,6 +433,7 @@ export const postMessage = async (req, res) => {
       else if (hasFood) matchedCampCategory = 'food';
       else if (hasTransport) matchedCampCategory = 'transport';
       else if (hasAtm) matchedCampCategory = 'atm';
+      else if (hasInstantCash) matchedCampCategory = 'instant_cash';
 
       if (matchedCampCategory) {
         finalPlacesList = activeLocalPlaces.filter(p => p.category === matchedCampCategory);
