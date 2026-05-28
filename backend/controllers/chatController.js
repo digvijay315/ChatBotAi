@@ -35,6 +35,7 @@ const verifiedLocalPlaces = [
 // --- OFF-LINE KEYWORD SEARCH ENGINE (FALLBACK) ---
 function getSimulatedResponse(question, data, latitude, longitude, activePlaces) {
   const q = question.toLowerCase();
+  const isHindi = /[\u0900-\u097F]/.test(question) || q.includes('bheed') || q.includes('katar') || q.includes('samay') || q.includes('rasta') || q.includes('shivir') || q.includes('bhir') || q.includes('bheed') || q.includes('prashad');
   const deity = data.deity;
   const name = data.name;
   const placesList = activePlaces || verifiedLocalPlaces;
@@ -51,8 +52,8 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
   const isPetrolQuery = q.includes('petrol') || q.includes('pump') || q.includes('fuel') || q.includes('tel') ||
                         q.includes('पेट्रोल') || q.includes('पंप') || q.includes('ईंधन') || q.includes('तेल');
                         
-  const isTransportQuery = q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('train') || q.includes('stand') || q.includes('transport') ||
-                           q.includes('बस') || q.includes('रेलवे') || q.includes('स्टेशन') || q.includes('ट्रेन') || q.includes('स्टैंड') || q.includes('परिवहन') || q.includes('गाड़ी') || q.includes('गाडी');
+  const isTransportQuery = q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('train') || q.includes('transport') ||
+                           q.includes('बस') || q.includes('रेलवे') || q.includes('स्टेशन') || q.includes('ट्रेन') || q.includes('परिवहन');
                            
   const isAtmQuery = q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise nikalne') ||
                      q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा') || q.includes('पैसे');
@@ -69,8 +70,11 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
                              q.includes('सक्रिय शिविर') || q.includes('अस्थायी शिविर') || q.includes('शिविरों की सूची') || q.includes('sabhi shivir') || q.includes('shivir list');
 
   const isInstantCashQuery = q.includes('instant cash') || q.includes('quick cash') || q.includes('qr cash') || q.includes('qr code cash') || q.includes('cash counter') || q.includes('नकद') || q.includes('कैश');
+  
+  const isParkingQuery = q.includes('parking') || q.includes('park') || q.includes('gadi khada') || q.includes('gaadi khadi') || q.includes('vahan stand') ||
+                         q.includes('पार्किंग') || q.includes('गाड़ी खड़ी') || q.includes('गाडी खडी') || q.includes('वाहन स्टैंड');
 
-  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery || isActiveCampsQuery || isInstantCashQuery ||
+  const isAmenitiesSearch = isHotelQuery || isHospitalQuery || isPetrolQuery || isTransportQuery || isAtmQuery || isFoodQuery || isCampQuery || isActiveCampsQuery || isInstantCashQuery || isParkingQuery ||
                             q.includes('facility') || q.includes('suvidha') || q.includes('nearby') || q.includes('paas') ||
                             q.includes('सुविधा') || q.includes('पास') || q.includes('नजदीक');
 
@@ -93,10 +97,13 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
       } else if (q.includes('food') || q.includes('langar') || q.includes('bhandara') || q.includes('khana') || q.includes('dudh') || q.includes('milk') || q.includes('भोजन') || q.includes('लंगर') || q.includes('भंडारा') || q.includes('खाना') || q.includes('दूध')) {
         targetCampCategory = 'food';
         categoryLabel = "भोजन / भंडारा / लंगर सेवा शिविर (Food & Langar Camps)";
-      } else if (q.includes('transport') || q.includes('bus') || q.includes('station') || q.includes('stand') || q.includes('gaadi') || q.includes('vahan') || q.includes('परिवहन') || q.includes('बस') || q.includes('गाड़ी') || q.includes('वाहन')) {
+      } else if (q.includes('parking') || q.includes('park') || q.includes('vahan') || q.includes('gadi') || q.includes('पार्किंग') || q.includes('वाहन') || q.includes('गाड़ी')) {
+        targetCampCategory = 'parking';
+        categoryLabel = "अस्थायी पार्किंग स्थल / वाहन स्टैंड (Parking Camps)";
+      } else if (q.includes('transport') || q.includes('bus') || q.includes('station') || q.includes('stand') || q.includes('परिवहन') || q.includes('बस') || q.includes('रेलवे') || q.includes('स्टेशन') || q.includes('स्टैंड')) {
         targetCampCategory = 'transport';
         categoryLabel = "अस्थायी परिवहन / बस सेवा शिविर (Transport Camps)";
-      } else if (q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise') || q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा')) {
+      } else if (q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise')) {
         targetCampCategory = 'atm';
         categoryLabel = "अस्थायी एटीएम / बैंकिंग शिविर (ATM Camps)";
       } else if (q.includes('instant cash') || q.includes('quick cash') || q.includes('qr cash') || q.includes('qr code cash') || q.includes('cash counter') || q.includes('नकद') || q.includes('कैश')) {
@@ -117,6 +124,9 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
     } else if (isPetrolQuery) {
       targetCategories = ['petrol_pump'];
       facilityName = "पेट्रोल पंप और ईंधन स्टेशनों";
+    } else if (isParkingQuery) {
+      targetCategories = ['parking'];
+      facilityName = "अस्थायी व स्थायी पार्किंग स्थलों और वाहन स्टैंडों";
     } else if (isTransportQuery) {
       targetCategories = ['bus_stand', 'railway_station', 'transport'];
       facilityName = "परिवहन सुविधाओं (बस स्टैंड और रेलवे स्टेशन)";
@@ -127,8 +137,8 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
       targetCategories = ['food'];
       facilityName = "भोजन और लंगर शिविरों";
     } else if (isCampQuery) {
-      targetCategories = ['stay', 'medical', 'food', 'hospital', 'instant_cash'];
-      facilityName = "अस्थायी शिविरों (आवास, स्वास्थ्य, भोजन और त्वरित कैश)";
+      targetCategories = ['stay', 'medical', 'food', 'hospital', 'instant_cash', 'parking'];
+      facilityName = "अस्थायी शिविरों (आवास, स्वास्थ्य, भोजन, त्वरित कैश और पार्किंग)";
     }
 
     let filteredPlaces = targetCategories.length > 0 
@@ -183,6 +193,81 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
       reply += `📞 **विशेष सहायता डेस्क (Volunteer Support Helpline):**\n   - [कॉल करें (${da.helplineNumber})](tel:${da.helplineNumber})\n\n`;
     }
     reply += `कृपया इन सुविधाओं का लाभ उठाएं। बाबा बासुकीनाथ आपकी यात्रा मंगलमय करें! 🙏`;
+    return reply;
+  }
+
+  const isCrowdQuery = q.includes('crowd') || q.includes('queue') || q.includes('rush') || q.includes('line') || q.includes('waiting') || q.includes('wait time') || 
+                       q.includes('bheed') || q.includes('vheed') || q.includes('katar') || q.includes('bhira') || q.includes('bhir') ||
+                       q.includes('भीड़') || q.includes('कतार') || q.includes('रश') || q.includes('कतार में') || q.includes('लाइन');
+  
+  if (isCrowdQuery) {
+    const cs = data.crowdStatus || {
+      status: 'normal',
+      waitTime: '30 मिनट',
+      description: 'कतार सामान्य है, दर्शन आसानी से हो रहे हैं।',
+      descriptionEn: 'Queue is normal, darshan is smooth.',
+      updatedAt: new Date()
+    };
+    
+    let statusText = "सामान्य (Normal)";
+    let emoji = "🟢";
+    if (cs.status === 'low') { statusText = "कम (Low)"; emoji = "🟢"; }
+    else if (cs.status === 'heavy') { statusText = "भारी (Heavy)"; emoji = "🟡"; }
+    else if (cs.status === 'peak') { statusText = "अत्यधिक भीड़ (Peak Rush) ⚠️"; emoji = "🔴"; }
+
+    const timeDiff = Math.max(0, Math.floor((Date.now() - new Date(cs.updatedAt).getTime()) / 60000));
+    let timeStr = timeDiff === 0 ? "अभी-अभी" : `${timeDiff} मिनट पहले`;
+    if (timeDiff >= 60) {
+      const hr = Math.floor(timeDiff / 60);
+      timeStr = `${hr} घंटे पहले`;
+    }
+
+    reply += `📊 **लाइव भीड़ और कतार स्थिति (Live Crowd & Queue Status)**:\n\n`;
+    reply += `${emoji} **भीड़ का स्तर (Crowd Level)**: ${statusText}\n`;
+    reply += `⏳ **कतार में लगने वाला समय (Queue Wait Time)**: ~ ${cs.waitTime || '30 मिनट'} (मंदिर पहुँचने के बाद)\n`;
+
+    // Dynamic travel time calculation based on live distance!
+    if (latitude && longitude) {
+      const distFromTemple = calculateDistance(latitude, longitude, 24.3850, 87.2514);
+      
+      let travelTimeMins = 0;
+      let travelMode = isHindi ? "वाहन (Vehicle)" : "Vehicle";
+      if (distFromTemple <= 1.5) {
+        travelMode = isHindi ? "पैदल (Walking)" : "Walking";
+        travelTimeMins = Math.round((distFromTemple / 4.5) * 60); // Walking: ~4.5 km/hr
+      } else {
+        travelTimeMins = Math.round((distFromTemple / 25) * 60); // Driving: ~25 km/hr in traffic
+      }
+      
+      let travelTimeStr = isHindi ? `${travelTimeMins} मिनट` : `${travelTimeMins} mins`;
+      if (travelTimeMins >= 60) {
+        const h = Math.floor(travelTimeMins / 60);
+        const m = travelTimeMins % 60;
+        if (isHindi) {
+          travelTimeStr = m > 0 ? `${h} घंटा ${m} मिनट` : `${h} घंटा`;
+        } else {
+          travelTimeStr = m > 0 ? `${h} hr ${m} mins` : `${h} hr`;
+        }
+      }
+      
+      if (isHindi) {
+        reply += `🚗 **यात्रा का अनुमानित समय (Travel Time)**: ~ ${travelTimeStr} (${travelMode} द्वारा, दूरी ${distFromTemple} किमी)\n`;
+        reply += `🔔 **कुल अनुमानित समय (Total Time to Darshan)**: लगभग **${travelTimeStr}** (यात्रा) + **${cs.waitTime}** (कतार)\n`;
+      } else {
+        reply += `🚗 **Travel Time to Temple**: ~ ${travelTimeStr} (via ${travelMode}, distance ${distFromTemple} km)\n`;
+        reply += `🔔 **Total Expected Time**: ~ **${travelTimeStr}** (Travel) + **${cs.waitTime}** (Queue)\n`;
+      }
+    } else {
+      if (isHindi) {
+        reply += `ℹ️ *नोट: यदि आप अपनी लोकेशन शेयर करते हैं, तो मैं आपके वर्तमान स्थान से यात्रा का समय जोड़कर कुल दर्शन समय भी बता सकता हूँ।*\n`;
+      } else {
+        reply += `ℹ️ *Note: Share your live location to view travel time added to queue wait time.*\n`;
+      }
+    }
+
+    reply += `\n📢 **ताज़ा स्थिति (Live Update)**: ${cs.description || 'दर्शन सुचारू रूप से चल रहे हैं।'}\n`;
+    reply += `⏱️ **अंतिम अपडेट (Last Updated)**: ${timeStr}\n\n`;
+    reply += `बाबा बासुकीनाथ के दर्शन के लिए आ रहे सभी श्रद्धालुओं से अनुरोध है कि नियमों का पालन करें। हर हर महादेव! 🙏`;
     return reply;
   }
 
@@ -350,27 +435,39 @@ export const postMessage = async (req, res) => {
       return res.status(404).json({ error: 'Temple details not loaded' });
     }
 
+    // Defensive check: Initialize crowdStatus defaults if missing in pre-existing database record
+    if (!data.crowdStatus || !data.crowdStatus.status) {
+      data.crowdStatus = {
+        status: 'normal',
+        waitTime: '30 मिनट',
+        description: 'कतार सामान्य है, दर्शन आसानी से हो रहे हैं।',
+        descriptionEn: 'Queue is normal, darshan is smooth.',
+        updatedAt: new Date()
+      };
+    }
+
     // Build the dynamic merged list of places (static + database-backed temporary camps)
     const activeLocalPlaces = [...verifiedLocalPlaces];
     if (data.temporaryCamps && data.temporaryCamps.length > 0) {
       data.temporaryCamps.forEach(camp => {
-        let categoryEmoji = '📍';
-        if (camp.category === 'stay') categoryEmoji = '🏨';
-        else if (camp.category === 'medical') categoryEmoji = '🏥';
-        else if (camp.category === 'food') categoryEmoji = '🍱';
-        else if (camp.category === 'transport') categoryEmoji = '🚌';
-        else if (camp.category === 'atm') categoryEmoji = '🏧';
-        else if (camp.category === 'instant_cash') categoryEmoji = '💵';
-
-        activeLocalPlaces.push({
-          name: `${camp.name} ${categoryEmoji} (${camp.category === 'stay' ? 'अस्थायी आवास' : camp.category === 'medical' ? 'अस्थायी चिकित्सा शिविर' : camp.category === 'food' ? 'अस्थायी भोजन/लंगर शिविर' : camp.category === 'atm' ? 'एटीएम/बैंक' : camp.category === 'instant_cash' ? 'त्वरित नकद (QR कोड से कैश)' : 'अस्थायी परिवहन सेवा'}) - ${camp.description}`,
-          lat: camp.lat,
-          lng: camp.lng,
-          category: camp.category,
-          query: `${camp.lat},${camp.lng}`,
-          description: camp.description,
-          isTemporary: true
-        });
+         let categoryEmoji = '📍';
+         if (camp.category === 'stay') categoryEmoji = '🏨';
+         else if (camp.category === 'medical') categoryEmoji = '🏥';
+         else if (camp.category === 'food') categoryEmoji = '🍱';
+         else if (camp.category === 'transport') categoryEmoji = '🚌';
+         else if (camp.category === 'atm') categoryEmoji = '🏧';
+         else if (camp.category === 'instant_cash') categoryEmoji = '💵';
+         else if (camp.category === 'parking') categoryEmoji = '🅿️';
+ 
+         activeLocalPlaces.push({
+           name: `${camp.name} ${categoryEmoji} (${camp.category === 'stay' ? 'अस्थायी आवास' : camp.category === 'medical' ? 'अस्थायी चिकित्सा शिविर' : camp.category === 'food' ? 'अस्थायी भोजन/लंगर शिविर' : camp.category === 'atm' ? 'एटीएम/बैंक' : camp.category === 'instant_cash' ? 'त्वरित नकद (QR कोड से कैश)' : camp.category === 'parking' ? 'अस्थायी पार्किंग स्थल व स्टैंड' : 'अस्थायी परिवहन सेवा'}) - ${camp.description}`,
+           lat: camp.lat,
+           lng: camp.lng,
+           category: camp.category,
+           query: `${camp.lat},${camp.lng}`,
+           description: camp.description,
+           isTemporary: true
+         });
       });
     }
 
@@ -390,11 +487,12 @@ export const postMessage = async (req, res) => {
     const hasStay = q.includes('stay') || q.includes('accommodation') || q.includes('aawas') || q.includes('thaharne') || q.includes('rukne') || q.includes('आवास') || q.includes('ठहरने') || q.includes('रुकने');
     const hasMedical = q.includes('medical') || q.includes('hospital') || q.includes('doctor') || q.includes('chikit') || q.includes('dawai') || q.includes('dawa') || q.includes('health') || q.includes('चिकित्सा') || q.includes('स्वास्थ्य') || q.includes('अस्पताल') || q.includes('इलाज') || q.includes('दवाई') || q.includes('डॉक्टर');
     const hasFood = q.includes('food') || q.includes('langar') || q.includes('bhandara') || q.includes('khana') || q.includes('doodh') || q.includes('dudh') || q.includes('milk') || q.includes('भोजन') || q.includes('लंगर') || q.includes('भंडारा') || q.includes('खाना') || q.includes('दूध') || q.includes('प्रसाद');
-    const hasTransport = q.includes('transport') || q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('stand') || q.includes('gaadi') || q.includes('vahan') || q.includes('परिवहन') || q.includes('बस') || q.includes('गाड़ी') || q.includes('वाहन') || q.includes('स्टैंड');
+    const hasTransport = q.includes('transport') || q.includes('bus') || q.includes('railway') || q.includes('station') || q.includes('train') || q.includes('परिवहन') || q.includes('बस') || q.includes('रेलवे') || q.includes('स्टेशन') || q.includes('ट्रेन');
     const hasAtm = q.includes('atm') || q.includes('bank') || q.includes('cash') || q.includes('paise') || q.includes('एटीएम') || q.includes('बैंक') || q.includes('कैश') || q.includes('पैसा');
     const hasInstantCash = q.includes('instant cash') || q.includes('quick cash') || q.includes('qr cash') || q.includes('qr code cash') || q.includes('cash counter') || q.includes('नकद') || q.includes('कैश');
+    const hasParking = q.includes('parking') || q.includes('park') || q.includes('gadi khada') || q.includes('gaadi khadi') || q.includes('vahan stand') || q.includes('पार्किंग') || q.includes('गाड़ी खड़ी') || q.includes('गाडी खडी') || q.includes('वाहन स्टैंड');
     
-    const hasSpecificCampCategory = hasStay || hasMedical || hasFood || hasTransport || hasAtm || hasInstantCash;
+    const hasSpecificCampCategory = hasStay || hasMedical || hasFood || hasTransport || hasAtm || hasInstantCash || hasParking;
 
     // A: Bypassing logic for general Camp requests to offer interactive selection
     if (isActiveCampsQuery && !hasSpecificCampCategory) {
@@ -407,6 +505,7 @@ export const postMessage = async (req, res) => {
 4. 🚌 **अस्थायी परिवहन / बस सेवा (Transport & Bus)**
 5. 🏧 **अस्थायी एटीएम / बैंकिंग (ATM & Banking)**
 6. 💵 **त्वरित नकद सेवा / QR कोड से कैश (Instant Cash via QR)**
+7. 🅿️ **अस्थायी पार्किंग स्थल / वाहन स्टैंड (Temporary Parking & Stand)**
 
 *(आप नीचे सजेशन बार में से भी सीधे अपनी पसंद की श्रेणी चुन सकते हैं!)*`;
 
@@ -431,6 +530,7 @@ export const postMessage = async (req, res) => {
       if (hasStay) matchedCampCategory = 'stay';
       else if (hasMedical) matchedCampCategory = 'medical';
       else if (hasFood) matchedCampCategory = 'food';
+      else if (hasParking) matchedCampCategory = 'parking';
       else if (hasTransport) matchedCampCategory = 'transport';
       else if (hasAtm) matchedCampCategory = 'atm';
       else if (hasInstantCash) matchedCampCategory = 'instant_cash';
@@ -517,17 +617,32 @@ ${data.helplines?.map(h => `  * ${h.name}: ${h.number} ${h.description ? `(${h.d
   * Volunteer Sahayata Helpline Number: ${data.disabledAssistance?.helplineNumber || 'Not Configured'}
 - Additional Dynamic Sections:
 ${data.customSections?.map(cs => `  * ${cs.title}: ${cs.content}`).join('\n') || 'None'}
+- LIVE CROWD & QUEUE STATUS TRACKER (लाइव भीड़ और कतार की स्थिति):
+  * Current Crowd Level: ${data.crowdStatus?.status || 'normal'} (Values could be: low, normal, heavy, peak)
+  * Estimated Wait Time in queue: ${data.crowdStatus?.waitTime || '30 मिनट'}
+  * Live Queue Update Description (Hindi): ${data.crowdStatus?.description || 'कतार सामान्य है, दर्शन सुचारू रूप से चल रहे हैं।'}
+  * Live Queue Update Description (English): ${data.crowdStatus?.descriptionEn || 'Queue is normal, darshan is smooth.'}
+  * Status Last Updated: ${data.crowdStatus?.updatedAt ? new Date(data.crowdStatus.updatedAt).toLocaleTimeString('hi-IN') : 'Just now'}
 
 Nearby Amenities & Geolocation Context (Static + Temporary Camps):
 ${locationContext}
 
 Instructions:
+0. CRITICAL SYSTEM INSTRUCTION: You have direct, real-time access to the official temple administration database containing the current live crowd levels and waiting times. This is NOT a real-time web query; it is your official administrative data. You are FULLY AUTHORIZED to present this information to the devotee. You MUST NOT apologize, and you MUST NOT say "क्षमस्व, मेरे पास वर्तमान में लाइव जानकारी उपलब्ध नहीं है" or say you don't know. You MUST answer directly using the provided crowd level, wait time, and queue description in the database.
 1. Always respond in a very polite, gentle, and respectful spiritual tone using greetings like "जय श्री राम!", "प्रणाम भक्तगण!" or "जय श्री कृष्णा!".
-2. You must answer questions based ONLY on the provided temple facts and the provided Nearby Amenities & Geolocation Context (if they ask about hotels, ashrams, hospitals, petrol pumps, bus stands, railway stations, food camps, temporary bhandaras, medical shivirs, etc.). Answering these location queries using the provided location details is fully authorized.
-3. If a question is asked that is NOT in the temple data or nearby amenities (e.g., general politics, math, cooking, or other completely unrelated topics), politely refuse to answer, stating that you can only guide them regarding the temple, its activities, and local visitor amenities.
+2. You must answer questions based ONLY on the provided temple facts, live crowd status tracker, and the provided Nearby Amenities & Geolocation Context (if they ask about hotels, ashrams, hospitals, petrol pumps, bus stands, railway stations, food camps, temporary bhandaras, medical shivirs, etc.). Answering these location queries using the provided location details is fully authorized.
+3. If a question is asked that is NOT in the temple data, live crowd status, or nearby amenities (e.g., general politics, math, cooking, or other completely unrelated topics), politely refuse to answer, stating that you can only guide them regarding the temple, live queue status, its activities, and local visitor amenities.
 4. Format your responses beautifully using Markdown (bold text, bullet points, headers, and click links) for rich presentation.
 5. Answer in the language the user asked in (e.g. Hinglish, Hindi, or English).
 6. यदि भक्त का स्वचालित जीपीएस (GPS) लोकेशन किसी ब्राउज़र/सिस्टम एरर के कारण उपलब्ध नहीं हो पाता, लेकिन वे अपने संदेश में अपने वर्तमान स्थान या शहर का नाम लिखते हैं (जैसे: "मैं अभी दुमका में हूँ, पास के होटल बताओ" या "मैं देवघर में हूँ, पेट्रोल पंप दिखाओ"), तो आप बुद्धिमत्ता से उस स्थान को उनका वर्तमान स्थान मान लें और वहाँ से मंदिर व नजदीकी धर्मशालाओं की दूरी और मार्ग समझाते हुए अत्यंत स्नेह से उत्तर दें।
+7. When devotee asks about crowd, waiting time, rush, lines or crowd tracker ("भीड़ कैसी है?", "दर्शन में कितना समय लगेगा?", "कतार की स्थिति", "wait time", "rush", "line status"), you MUST present this live crowd status, estimated waiting time, and description to them. Ensure the crowd level is translated respectfully (low: कम, normal: सामान्य, heavy: भारी, peak: अत्यधिक भीड़ ⚠️) and highlight the estimated wait time.
+8. Location-Aware Darshan Calculations (भक्त के स्थान आधारित दर्शन गणना):
+   - If devotee's live GPS coordinates are shared, calculate approximate travel duration. Assume average walking speed is ~4.5 km/h (for distances <= 1.5 km) and driving speed is ~25 km/h through local traffic (for distances > 1.5 km).
+   - Inform the devotee of both:
+     a) Travel Time (यात्रा का समय): The estimated time it takes to travel from their current location.
+     b) Queue Wait Time (कतार का समय): The wait time in the temple queue set by the Admin (${data.crowdStatus?.waitTime || '30 मिनट'}).
+     c) Total Expected Time (कुल अनुमानित समय): Sum of travel time and queue wait time! For example: "चूंकि आप मंदिर से 5 किमी दूर हैं, वहां से यहाँ पहुँचने में लगभग 12 मिनट लगेंगे। अभी मंदिर की कतार में लगभग 30 मिनट का समय लग रहा है, अतः दर्शन पूरे होने में कुल लगभग 42 मिनट (12 मिनट यात्रा + 30 मिनट कतार) का समय लगेगा।"
+   - If GPS coordinates are not available, gently state that travel time cannot be added, but they can get exact total travel + queue wait times by enabling location permissions!
 `;
 
       let fullPrompt = `${context}\n\n`;

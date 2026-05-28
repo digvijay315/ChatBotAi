@@ -31,6 +31,12 @@ export default function AdminPanel({
       eRickshawRoutes: '',
       specialEntryGates: '',
       helplineNumber: ''
+    },
+    crowdStatus: {
+      status: 'normal',
+      waitTime: '30 मिनट',
+      description: 'कतार सामान्य है, दर्शन आसानी से हो रहे हैं।',
+      descriptionEn: 'Queue is normal, darshan is smooth.'
     }
   });
   
@@ -59,6 +65,12 @@ export default function AdminPanel({
           eRickshawRoutes: '',
           specialEntryGates: '',
           helplineNumber: ''
+        },
+        crowdStatus: templeData.crowdStatus || {
+          status: 'normal',
+          waitTime: '30 मिनट',
+          description: 'कतार सामान्य है, दर्शन आसानी से हो रहे हैं।',
+          descriptionEn: 'Queue is normal, darshan is smooth.'
         }
       });
     }
@@ -70,14 +82,13 @@ export default function AdminPanel({
     icon,
     background: isDarkMode ? '#1c1917' : '#ffffff',
     color: isDarkMode ? '#f5f5f4' : '#1c1917',
-    confirmButtonColor: '#f2780c', // Elegant Saffron color matching design system
-    cancelButtonColor: isDarkMode ? '#44403c' : '#d6d3d1', // Stone color matching design system
+    buttonsStyling: false,
     customClass: {
       popup: 'rounded-[24px] border border-orange-100/50 dark:border-stone-850 shadow-lg font-sans text-xs',
       title: 'font-spiritual font-extrabold text-base text-saffron-500',
       htmlContainer: 'font-semibold text-xs',
-      confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md transition-all active:scale-95 text-white bg-saffron-500 hover:bg-saffron-600',
-      cancelButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md transition-all active:scale-95 text-stone-700 dark:text-stone-300 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700'
+      confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md transition-all active:scale-95 text-white bg-saffron-500 hover:bg-saffron-600 mr-2 ml-2',
+      cancelButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md transition-all active:scale-95 text-stone-700 dark:text-stone-300 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 mr-2 ml-2'
     }
   });
 
@@ -624,6 +635,12 @@ export default function AdminPanel({
             eRickshawRoutes: "बस स्टैंड से सिंह द्वार तक निशुल्क ई-रिक्शा सेवा सक्रिय है।",
             specialEntryGates: "70 वर्ष से अधिक आयु के बुजुर्गों और दिव्यांगों के लिए गेट नंबर 3 से सीधे निशुल्क प्रवेश की व्यवस्था है (लाइन में लगने की आवश्यकता नहीं है)।",
             helplineNumber: "+91-9431301037"
+          },
+          crowdStatus: {
+            status: 'normal',
+            waitTime: '30 मिनट',
+            description: 'कतार सामान्य है, दर्शन आसानी से हो रहे हैं।',
+            descriptionEn: 'Queue is normal, darshan is smooth.'
           }
         };
         
@@ -1194,6 +1211,7 @@ export default function AdminPanel({
                   <option value="transport">{t('adminCategoryTransport', language)}</option>
                   <option value="atm">{t('adminCategoryAtm', language)}</option>
                   <option value="instant_cash">{t('adminCategoryInstantCash', language)}</option>
+                  <option value="parking">{t('adminCategoryParking', language)}</option>
                 </select>
               </div>
             </div>
@@ -1508,6 +1526,218 @@ export default function AdminPanel({
                 }`}
                 placeholder="e.g. +91-9431301037"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 10: Live Crowd & Queue Tracker */}
+        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+          isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
+        }`}>
+          <div className="flex items-center gap-2 border-b border-stone-200 dark:border-stone-850 pb-2">
+            <h3 className="text-base font-extrabold font-spiritual text-saffron-500">
+              {language === 'hi' ? '📊 लाइव भीड़ और दर्शन कतार ट्रैकर' : '📊 Live Crowd & Queue Status Tracker'}
+            </h3>
+            <span className="text-[10px] px-2.5 py-0.5 bg-saffron-100 text-saffron-700 dark:bg-saffron-950/30 dark:text-saffron-400 rounded-full border border-saffron-200 dark:border-saffron-900/20 font-bold font-sans animate-pulse">
+              {language === 'hi' ? 'लाइव नियंत्रण' : 'Live Control'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Left: Interactive Controls */}
+            <div className="space-y-4">
+              {/* Crowd level selection */}
+              <div>
+                <label className="block text-[11px] font-bold mb-2 text-stone-500 dark:text-stone-400">
+                  {language === 'hi' ? 'भीड़ का स्तर (Crowd Level)' : 'Crowd Level'}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { value: 'low', label: 'कम (Low)', color: 'border-green-500 text-green-600 bg-green-50/30 dark:bg-green-950/10' },
+                    { value: 'normal', label: 'सामान्य (Normal)', color: 'border-amber-500 text-amber-600 bg-amber-50/30 dark:bg-amber-950/10' },
+                    { value: 'heavy', label: 'भारी (Heavy)', color: 'border-orange-500 text-orange-600 bg-orange-50/30 dark:bg-orange-950/10' },
+                    { value: 'peak', label: 'अत्यधिक भीड़ (Peak)', color: 'border-red-500 text-red-600 bg-red-50/30 dark:bg-red-950/10' }
+                  ].map((lvl) => {
+                    const isSelected = (formData.crowdStatus?.status || 'normal') === lvl.value;
+                    return (
+                      <button
+                        key={lvl.value}
+                        type="button"
+                        onClick={() => {
+                          let autoWait = '30 मिनट';
+                          let autoDesc = 'कतार सामान्य है, दर्शन सुचारू रूप से चल रहे हैं।';
+                          let autoDescEn = 'Queue is normal, darshan is smooth.';
+
+                          if (lvl.value === 'low') {
+                            autoWait = '15 मिनट';
+                            autoDesc = 'कतार बहुत छोटी है, दर्शन अत्यंत सुलभ और शीघ्र हो रहे हैं। आप तुरंत मंदिर पधार सकते हैं।';
+                            autoDescEn = 'The queue is very short. Darshan is extremely smooth and quick. You can visit immediately.';
+                          } else if (lvl.value === 'normal') {
+                            autoWait = '30 मिनट';
+                            autoDesc = 'कतार सामान्य है, दर्शन सुचारू रूप से चल रहे हैं। दर्शन में लगभग 30-45 मिनट का समय लग सकता है।';
+                            autoDescEn = 'The queue is normal and moving smoothly. Darshan might take around 30-45 minutes.';
+                          } else if (lvl.value === 'heavy') {
+                            autoWait = '1.5 घंटे';
+                            autoDesc = 'मेले/त्योहार के कारण मंदिर में भीड़ भारी है। कतार सिंह द्वार तक पहुँच चुकी है, दर्शन में लगभग 1.5 से 2 घंटे लगेंगे।';
+                            autoDescEn = 'Heavy crowd at the temple due to Basukinath Mela. The queue is near Singh Dwar, estimated wait time is 1.5 to 2 hours.';
+                          } else if (lvl.value === 'peak') {
+                            autoWait = '3+ घंटे';
+                            autoDesc = 'अत्यधिक भीड़! कतार मुख्य मार्ग तक पहुँच चुकी है। सुरक्षा कारणों से दर्शन में 3+ घंटे का समय लग सकता है। कृपया धैर्य रखें।';
+                            autoDescEn = 'Peak Rush! The queue has extended to the main transit road. Due to safety controls, expect 3+ hours wait time. Please remain patient.';
+                          }
+
+                          setFormData(prev => ({
+                            ...prev,
+                            crowdStatus: {
+                              status: lvl.value,
+                              waitTime: autoWait,
+                              description: autoDesc,
+                              descriptionEn: autoDescEn,
+                              updatedAt: new Date()
+                            }
+                          }));
+                        }}
+                        className={`px-3 py-3 rounded-xl border text-center text-xs font-bold transition-all active:scale-95 flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                          isSelected 
+                            ? `${lvl.color} border-2 ring-2 ring-offset-2 ring-saffron-400`
+                            : 'border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-900/50'
+                        }`}
+                      >
+                        <span className="text-base">
+                          {lvl.value === 'low' ? '🟢' : lvl.value === 'normal' ? '🟡' : lvl.value === 'heavy' ? '🟠' : '🔴'}
+                        </span>
+                        <span>{lvl.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Waiting Time Input */}
+              <div>
+                <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="wait-time-input">
+                  {language === 'hi' ? 'कतार में लगने वाला अनुमानित समय (Estimated Wait Time)' : 'Estimated Wait Time'}
+                </label>
+                <input
+                  id="wait-time-input"
+                  type="text"
+                  value={formData.crowdStatus?.waitTime || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    crowdStatus: {
+                      ...(prev.crowdStatus || {}),
+                      waitTime: e.target.value,
+                      updatedAt: new Date()
+                    }
+                  }))}
+                  placeholder={language === 'hi' ? 'जैसे: 30 मिनट, 1.5 घंटे, 3+ घंटे' : 'e.g. 30 minutes, 1.5 hours, 3+ hours'}
+                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+                
+                {/* Wait time quick selection chips */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {['15 मिनट', '30 मिनट', '45 मिनट', '1 घंटा', '1.5 घंटे', '2 घंटे', '3+ घंटे'].map((chipVal) => (
+                    <button
+                      key={chipVal}
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        crowdStatus: {
+                          ...(prev.crowdStatus || {}),
+                          waitTime: chipVal,
+                          updatedAt: new Date()
+                        }
+                      }))}
+                      className={`px-2.5 py-1 text-[10px] rounded-lg font-bold border transition-all active:scale-95 ${
+                        (formData.crowdStatus?.waitTime || '') === chipVal
+                          ? 'border-saffron-500 text-saffron-600 bg-saffron-50 dark:bg-saffron-950/20'
+                          : 'border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-900/50'
+                      }`}
+                    >
+                      {chipVal}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Custom Text Updates */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="crowd-desc-hi">
+                  {language === 'hi' ? 'लाइव स्थिति विवरण (हिंदी में)' : 'Live Description (Hindi)'}
+                </label>
+                <textarea
+                  id="crowd-desc-hi"
+                  value={formData.crowdStatus?.description || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    crowdStatus: {
+                      ...(prev.crowdStatus || {}),
+                      description: e.target.value,
+                      updatedAt: new Date()
+                    }
+                  }))}
+                  rows={2}
+                  className={`w-full px-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors text-xs font-semibold leading-relaxed ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                  placeholder="जैसे: अभी कतार सिंह द्वार तक है, दर्शन में लगभग 1.5 घंटे का समय लगेगा।"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold mb-1 text-stone-500 dark:text-stone-400" htmlFor="crowd-desc-en">
+                  {language === 'hi' ? 'लाइव स्थिति विवरण (अंग्रेज़ी में)' : 'Live Description (English)'}
+                </label>
+                <textarea
+                  id="crowd-desc-en"
+                  value={formData.crowdStatus?.descriptionEn || ''}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    crowdStatus: {
+                      ...(prev.crowdStatus || {}),
+                      descriptionEn: e.target.value,
+                      updatedAt: new Date()
+                    }
+                  }))}
+                  rows={2}
+                  className={`w-full px-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors text-xs font-semibold leading-relaxed ${
+                    isDarkMode ? 'bg-stone-950/80 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                  placeholder="e.g. Queue is at Singh Dwar, estimated wait time is 1.5 hours."
+                />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Chatbot Preview Section */}
+          <div className="pt-3 border-t border-dashed border-stone-200 dark:border-stone-800">
+            <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-saffron-600 mb-2">
+              {language === 'hi' ? 'श्रद्धालुओं को कैसा दिखेगा (Live Devotee Chatbot Preview):' : 'Live Devotee Chatbot Preview:'}
+            </h4>
+            <div className={`p-4 rounded-2xl border text-xs font-semibold leading-relaxed ${
+              isDarkMode ? 'bg-stone-950/80 border-stone-800 text-stone-200' : 'bg-orange-50/20 border-orange-100/50 text-stone-700'
+            }`}>
+              <div className="flex items-center gap-1.5 font-bold text-saffron-600 dark:text-saffron-400 mb-1">
+                <span>🤖</span>
+                <span>पुजारी जी (Pujari Ji):</span>
+              </div>
+              <p className="whitespace-pre-line leading-relaxed">
+                📊 **लाइव भीड़ और कतार स्थिति (Live Crowd & Queue Status)**:
+                {"\n"}🟢 **भीड़ का स्तर (Crowd Level)**: {
+                  (formData.crowdStatus?.status === 'low') ? (language === 'hi' ? 'कम (Low)' : 'Low') : 
+                  (formData.crowdStatus?.status === 'heavy') ? (language === 'hi' ? 'भारी (Heavy)' : 'Heavy') :
+                  (formData.crowdStatus?.status === 'peak') ? (language === 'hi' ? 'अत्यधिक भीड़ (Peak Rush) ⚠️' : 'Peak Rush ⚠️') : (language === 'hi' ? 'सामान्य (Normal)' : 'Normal')
+                }
+                {"\n"}⏳ **कतार में अनुमानित समय (Estimated Wait Time)**: ~ {formData.crowdStatus?.waitTime || '30 मिनट'}
+                {"\n\n"}📢 **ताज़ा स्थिति (Live Update)**: {formData.crowdStatus?.description || 'कतार सामान्य है, दर्शन सुचारू रूप से चल रहे हैं।'}
+                {"\n"}⏱️ **अंतिम अपडेट (Last Updated)**: अभी-अभी (Live)
+              </p>
             </div>
           </div>
         </div>

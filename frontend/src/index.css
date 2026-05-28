@@ -98,3 +98,120 @@
 .float-animation {
   animation: float 4s infinite ease-in-out;
 }
+
+/* ==========================================
+   SweetAlert2 Custom Premium Styling & Visibility Fix
+   ========================================== */
+.swal2-container {
+  z-index: 99999 !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.swal2-popup.swal2-toast {
+  background: rgba(28, 25, 23, 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(242, 120, 12, 0.2) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Themed Popup Card */
+.swal2-popup {
+  border-radius: 24px !important;
+  font-family: 'Outfit', 'Inter', sans-serif !important;
+  padding: 2.25rem 1.75rem !important;
+  box-shadow: 0 25px 50px -12px rgba(242, 120, 12, 0.15) !important;
+}
+
+/* Saffron Confirm Button */
+.swal2-styled.swal2-confirm {
+  background-color: #f2780c !important; /* Premium Saffron-500 */
+  background-image: linear-gradient(135deg, #fa9e42 0%, #f2780c 100%) !important;
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 600 !important;
+  border-radius: 14px !important;
+  padding: 0.75rem 1.75rem !important;
+  font-size: 0.875rem !important;
+  box-shadow: 0 4px 14px rgba(242, 120, 12, 0.4) !important;
+  border: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-width: 110px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  outline: none !important;
+}
+
+.swal2-styled.swal2-confirm:hover {
+  background-image: linear-gradient(135deg, #f2780c 0%, #d65b04 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(242, 120, 12, 0.55) !important;
+}
+
+.swal2-styled.swal2-confirm:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 2px 6px rgba(242, 120, 12, 0.3) !important;
+}
+
+/* Stone Cancel Button */
+.swal2-styled.swal2-cancel {
+  background-color: #78716c !important; /* Stone-500 */
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 500 !important;
+  border-radius: 14px !important;
+  padding: 0.75rem 1.75rem !important;
+  font-size: 0.875rem !important;
+  box-shadow: 0 4px 14px rgba(120, 113, 108, 0.25) !important;
+  border: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-width: 110px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  outline: none !important;
+}
+
+.swal2-styled.swal2-cancel:hover {
+  background-color: #57534e !important; /* Stone-600 */
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(120, 113, 108, 0.35) !important;
+}
+
+.swal2-styled.swal2-cancel:active {
+  transform: translateY(1px) !important;
+  box-shadow: 0 2px 6px rgba(120, 113, 108, 0.15) !important;
+}
+
+/* Ensure Actions Container has Proper Layout */
+.swal2-actions {
+  display: flex !important;
+  gap: 16px !important;
+  margin-top: 1.75rem !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+/* Themed Title and Text */
+.swal2-title {
+  font-family: 'Cinzel', 'Rozha One', 'serif' !important;
+  font-weight: 700 !important;
+  font-size: 1.35rem !important;
+  letter-spacing: 0.025em !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.swal2-html-container {
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  opacity: 0.9 !important;
+}
+
+/* Fix Focus Outlines */
+.swal2-styled:focus {
+  box-shadow: 0 0 0 3px rgba(242, 120, 12, 0.4) !important;
+}
+

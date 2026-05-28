@@ -38,6 +38,13 @@ const TempleSchema = new mongoose.Schema({
     eRickshawRoutes: { type: String, default: "" },
     specialEntryGates: { type: String, default: "" },
     helplineNumber: { type: String, default: "" }
+  },
+  crowdStatus: {
+    status: { type: String, default: 'normal' }, // 'low', 'normal', 'heavy', 'peak'
+    waitTime: { type: String, default: '30 मिनट' }, // wait time string
+    description: { type: String, default: 'कतार सामान्य है, दर्शन आसानी से हो रहे हैं।' }, // custom Hindi note
+    descriptionEn: { type: String, default: 'Queue is normal, darshan is smooth.' }, // custom English note
+    updatedAt: { type: Date, default: Date.now }
   }
 }, { timestamps: true });
 

@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import ChatArea from '../components/ChatArea';
 import { t } from '../utils/translations';
 import shivlingImg from '../assets/shivling.png';
+import { Trash2 } from 'lucide-react';
 
 export default function ChatDashboardPage() {
   const {
@@ -23,6 +24,7 @@ export default function ChatDashboardPage() {
     isLoading,
     handleCreateSession,
     handleDeleteSession,
+    handleClearChat,
     handleSendMessage,
     handleLogout
   } = useApp();
@@ -102,14 +104,28 @@ export default function ChatDashboardPage() {
                 </p>
               </div>
 
-              {/* Show login status info for Admin */}
-              {user?.role === 'admin' && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] px-3 py-1 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full font-bold text-stone-600 dark:text-stone-400">
-                    ⚙️ Admin Panel Active
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {/* Clear Chat Button for Devotees (non-admins) */}
+                {user?.role !== 'admin' && (
+                  <button
+                    onClick={handleClearChat}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-250/60 text-red-600 dark:bg-red-950/20 dark:border-red-950/40 dark:text-red-400 text-xs font-bold rounded-xl transition-all shadow-sm active:scale-95"
+                    title={t('clearChat', language)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{t('clearChat', language)}</span>
+                  </button>
+                )}
+
+                {/* Show login status info for Admin */}
+                {user?.role === 'admin' && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] px-3 py-1 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-full font-bold text-stone-600 dark:text-stone-400">
+                      ⚙️ Admin Panel Active
+                    </span>
+                  </div>
+                )}
+              </div>
             </header>
 
             {/* Devotee Chat Area */}

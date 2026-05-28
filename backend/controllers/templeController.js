@@ -24,6 +24,9 @@ export const updateTempleData = async (req, res) => {
       data = new Temple(req.body);
     } else {
       Object.assign(data, req.body);
+      // Force Mongoose to serialize and save nested subdocuments (deep change tracking bypass)
+      data.markModified('disabledAssistance');
+      data.markModified('crowdStatus');
     }
     await data.save();
     console.log('💾 Temple data updated by Admin successfully!');

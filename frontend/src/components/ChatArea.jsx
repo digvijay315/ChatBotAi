@@ -141,6 +141,7 @@ export default function ChatArea({
   };
 
   const quickQuestions = [
+    { text: t('quickCrowd', language), query: t('quickCrowdQuery', language) },
     { text: t('quickAarti', language), query: t('quickAartiQuery', language) },
     { text: t('quickHistory', language), query: t('quickHistoryQuery', language) },
     { text: t('quickRules', language), query: t('quickRulesQuery', language) },
@@ -162,6 +163,7 @@ export default function ChatArea({
     { text: language === 'hi' ? "🚌 परिवहन शिविर" : "🚌 Transport Camps", query: language === 'hi' ? "सक्रिय अस्थायी परिवहन शिविर दिखाओ" : "Show active transport camps" },
     { text: language === 'hi' ? "🏧 एटीएम शिविर" : "🏧 ATM Camps", query: language === 'hi' ? "सक्रिय अस्थायी एटीएम शिविर दिखाओ" : "Show active ATM camps" },
     { text: language === 'hi' ? "💵 त्वरित कैश सेवा" : "💵 Instant Cash", query: language === 'hi' ? "सक्रिय अस्थायी त्वरित कैश सेवा शिविर दिखाओ" : "Show active instant cash camps" },
+    { text: language === 'hi' ? "🅿️ पार्किंग शिविर" : "🅿️ Parking Camps", query: language === 'hi' ? "सक्रिय अस्थायी पार्किंग शिविर दिखाओ" : "Show active parking camps" },
     { text: language === 'hi' ? "⬅️ वापस" : "⬅️ Go Back", query: null, isBack: true }
   ];
 
