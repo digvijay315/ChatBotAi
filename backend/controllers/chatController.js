@@ -196,9 +196,12 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
     return reply;
   }
 
-  const isCrowdQuery = q.includes('crowd') || q.includes('queue') || q.includes('rush') || q.includes('line') || q.includes('waiting') || q.includes('wait time') || 
+  const isCrowdQuery = q.includes('crowd') || q.includes('queue') || q.includes('rush') || 
+                       (q.includes('line') && !q.includes('helpline') && !q.includes('online')) || 
+                       q.includes('waiting') || q.includes('wait time') || 
                        q.includes('bheed') || q.includes('vheed') || q.includes('katar') || q.includes('bhira') || q.includes('bhir') ||
-                       q.includes('भीड़') || q.includes('कतार') || q.includes('रश') || q.includes('कतार में') || q.includes('लाइन');
+                       q.includes('भीड़') || q.includes('कतार') || q.includes('रश') || q.includes('कतार में') || 
+                       (q.includes('लाइन') && !q.includes('हेल्पलाइन') && !q.includes('ऑनलाइन'));
   
   if (isCrowdQuery) {
     const cs = data.crowdStatus || {
