@@ -48,6 +48,12 @@ export default function AdminPanel({
   const [newCamp, setNewCamp] = useState({ name: '', category: 'stay', lat: '', lng: '', description: '' });
   const [newHelpline, setNewHelpline] = useState({ name: '', number: '', description: '' });
   const [plusCodeInput, setPlusCodeInput] = useState('');
+  const [qrUrl, setQrUrl] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return window.location.origin;
+    }
+    return 'https://chat-bot-ai-five-swart.vercel.app';
+  });
   
   const [notification, setNotification] = useState({ type: '', message: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -1725,6 +1731,176 @@ export default function AdminPanel({
                 {"\n"}⏱️ **अंतिम अपडेट (Last Updated)**: अभी-अभी (Live)
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Section 11: Deployed QR Code Standee & Print Placard Generator */}
+        <div className={`p-6 rounded-[28px] shadow-sm border space-y-6 md:col-span-2 ${
+          isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
+        }`}>
+          <div className="flex items-center gap-2 border-b border-stone-200 dark:border-stone-850 pb-2">
+            <h3 className="text-base font-extrabold font-spiritual text-saffron-500">
+              {language === 'hi' ? '🕉️ बाबा बासुकीनाथ धाम QR कोड और प्रचार स्टैंडी' : '🕉️ Baba Basukinath Dham QR Code & Promotion Standee'}
+            </h3>
+            <span className="text-[10px] px-2.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400 rounded-full border border-green-200 dark:border-green-900/20 font-bold font-sans">
+              {language === 'hi' ? 'प्रिंट रेडी' : 'Print Ready'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            
+            {/* Left: QR Control & Settings */}
+            <div className="space-y-4">
+              <p className="text-xs font-semibold leading-relaxed text-stone-500 dark:text-stone-400">
+                {language === 'hi'
+                  ? 'श्रद्धालुओं को सीधे चैट बोट से जोड़ने के लिए मंदिर परिसर (गर्भगृह कतार, बस स्टैंड, प्रवेश द्वार) पर लगाने हेतु प्रिंट-रेडी प्रचार स्टैंडी (QR Placard) जनरेट करें। श्रद्धालुओं को कोई भी URL टाइप करने की आवश्यकता नहीं होगी, वे सिर्फ स्कैन करके डिजिटल पुजारी जी से बात कर सकेंगे।'
+                  : 'Generate a print-ready promotion standee (QR Placard) to display around the temple complex (queue gates, bus stand, entrance) for direct chatbot access. Devotees won\'t need to type any URL; they can simply scan and start talking to Pujari Ji AI.'
+                }
+              </p>
+
+              <div>
+                <label className="block text-[11px] font-bold mb-1.5 text-stone-500 dark:text-stone-400" htmlFor="qr-custom-url">
+                  {language === 'hi' ? 'चैटबॉट का वेब URL (Website Address for QR Code):' : 'Chatbot Website URL (Address for QR Code):'}
+                </label>
+                <input
+                  id="qr-custom-url"
+                  type="text"
+                  value={qrUrl}
+                  onChange={(e) => setQrUrl(e.target.value)}
+                  placeholder="https://chatbotai-gtpm.onrender.com"
+                  className={`w-full px-3 py-2.5 rounded-xl border text-xs font-semibold focus:ring-2 focus:ring-saffron-500 focus:outline-none transition-colors ${
+                    isDarkMode ? 'bg-stone-900 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-900'
+                  }`}
+                />
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 font-semibold">
+                  💡 {language === 'hi' ? 'यह आपके वर्तमान डोमेन को ऑटो-डिटेक्ट कर लेता है। जरूरत पड़ने पर इसे बदल भी सकते हैं।' : 'This automatically detects your current host domain. Modify if deploying elsewhere.'}
+                </p>
+              </div>
+
+              {/* Quick instructions / tips */}
+              <div className={`p-4 rounded-2xl border text-xs font-semibold leading-relaxed space-y-2 ${
+                isDarkMode ? 'bg-stone-950/40 border-stone-850 text-stone-300' : 'bg-orange-50/10 border-orange-100/50 text-stone-700'
+              }`}>
+                <h4 className="font-extrabold text-saffron-500 flex items-center gap-1.5">
+                  <span>📢</span>
+                  <span>{language === 'hi' ? 'प्रिंट करने के निर्देश:' : 'Print Instructions:'}</span>
+                </h4>
+                <ul className="list-disc pl-4 space-y-1 text-[11px] leading-relaxed">
+                  <li>{language === 'hi' ? 'दाहिनी ओर दिए गए स्टैंडी के डिज़ाइन को देखें।' : 'Review the standee placard design shown on the right.'}</li>
+                  <li>{language === 'hi' ? '"प्रिंट स्टैंडी / PDF सेव करें" बटन पर क्लिक करें।' : 'Click the "Print Standee / Save as PDF" button.'}</li>
+                  <li>{language === 'hi' ? 'एक नई प्रिंट-फ्रेंडली विंडो खुलेगी जो सीधे प्रिंटर डायलॉग को ट्रिगर करेगी।' : 'A clean print window will pop up triggering your system printer.'}</li>
+                  <li>{language === 'hi' ? 'कागज का आकार A4 या A3 चुनें, "Color Printing" चालू करें और इसे प्रिंट करके एक सुंदर स्टैंडी फ्रेम में मढ़वा लें।' : 'Choose A4 or A3 paper size, enable "Color Printing", print it, and place it in a premium acrylic frame.'}</li>
+                </ul>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`
+                      <html>
+                        <head>
+                          <title>Baba Basukinath Dham QR Standee</title>
+                          <style>
+                            body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui, -apple-system, sans-serif; background-color: #fff; }
+                            .print-card {
+                              width: 460px;
+                              padding: 40px 30px;
+                              border: 10px double #eab308;
+                              border-radius: 36px;
+                              background: linear-gradient(135deg, #ea580c 0%, #b45309 100%);
+                              color: white;
+                              text-align: center;
+                              box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+                            }
+                            .om-symbol { font-size: 40px; margin-bottom: 5px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+                            .print-title { font-size: 28px; font-weight: 900; margin-bottom: 2px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+                            .print-sub { font-size: 14px; font-weight: 800; margin-bottom: 25px; color: #fef08a; letter-spacing: 0.8px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+                            .qr-frame { background: white; padding: 18px; border-radius: 24px; display: inline-block; box-shadow: 0 12px 24px rgba(0,0,0,0.2); margin-bottom: 25px; }
+                            .qr-img { width: 230px; height: 230px; display: block; }
+                            .print-footer-title { font-size: 18px; font-weight: 900; margin-bottom: 8px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+                            .print-desc { font-size: 11.5px; font-weight: 600; line-height: 1.6; color: #ffedd5; max-width: 340px; margin: 0 auto; }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="print-card">
+                            <div class="om-symbol">🕉️</div>
+                            <div class="print-title">बाबा बासुकीनाथ धाम</div>
+                            <div class="print-sub">डिजिटल मार्गदर्शक (AI Chatbot)</div>
+                            <div class="qr-frame">
+                              <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrUrl)}" />
+                            </div>
+                            <div class="print-footer-title">स्कैन करें और सीधे चैट बोट से बात करें!</div>
+                            <div class="print-desc">
+                              दर्शन समय, लाइव आरती, कतार में प्रतीक्षा समय, चिकित्सा शिविर, लंगर, और पार्किंग जैसी सभी आवश्यक सुविधाएं सीधे अपने फोन पर पाएं।
+                            </div>
+                          </div>
+                          <script>
+                            window.onload = function() {
+                              window.print();
+                              setTimeout(function() { window.close(); }, 500);
+                            };
+                          </script>
+                        </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold rounded-2xl text-xs shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <span>🖨️</span>
+                  <span>{language === 'hi' ? 'प्रिंट स्टैंडी / PDF सेव करें (Print QR Placard)' : 'Print Standee / Save as PDF'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Premium Standee Real-time Preview */}
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-2">
+                {language === 'hi' ? 'लाइव डिज़ाइन प्रीव्यू (Standee Live Preview):' : 'Placard Live Preview:'}
+              </span>
+              
+              {/* Standee Placard Card */}
+              <div 
+                id="qr-standee-preview-card"
+                className="w-full max-w-[340px] aspect-[4/5] rounded-[36px] border-4 border-yellow-400 p-6 flex flex-col items-center justify-center text-center text-white shadow-xl relative overflow-hidden bg-gradient-to-b from-orange-600 to-amber-700"
+              >
+                {/* Spiritual subtle pattern background */}
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+                
+                <div className="relative z-10 space-y-4">
+                  <div className="text-3xl filter drop-shadow-md">🕉️</div>
+                  <div>
+                    <h4 className="text-lg font-black tracking-wide text-white drop-shadow-sm font-spiritual">
+                      बाबा बासुकीनाथ धाम
+                    </h4>
+                    <p className="text-[9px] font-black text-yellow-300 tracking-wider uppercase">
+                      डिजिटल मार्गदर्शक (AI Chatbot)
+                    </p>
+                  </div>
+
+                  {/* QR Image Frame */}
+                  <div className="bg-white p-3 rounded-2xl shadow-lg border border-orange-100 flex items-center justify-center">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}`}
+                      alt="Basukinath Dham Chatbot QR Code" 
+                      className="w-40 h-40 object-contain rounded-lg"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-extrabold text-white">
+                      स्कैन करें और सीधे चैट बोट से बात करें!
+                    </p>
+                    <p className="text-[8px] text-orange-100 leading-normal max-w-[260px] mx-auto font-medium">
+                      दर्शन समय, लाइव आरती, कतार में प्रतीक्षा समय, चिकित्सा शिविर, लंगर, और पार्किंग की जानकारी सीधे अपने फोन पर पाएं।
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
