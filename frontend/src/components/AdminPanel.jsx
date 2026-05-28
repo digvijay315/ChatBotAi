@@ -285,23 +285,11 @@ export default function AdminPanel({
         return;
       }
 
-      // Show loader while decoding (simulate instant feedback)
-      Swal.fire({
-        title: language === 'hi' ? 'प्लस कोड डिकोड हो रहा है...' : 'Decoding Plus Code...',
-        background: isDarkMode ? '#1c1917' : '#ffffff',
-        color: isDarkMode ? '#f5f5f4' : '#1c1917',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-
       let fullCode = cleanCode;
-      // If it is a short code, recover using Baba Basukinath Temple as reference (24.3850, 87.2514)
+      // If it is a short code, recover using Baba Basukinath Temple as reference
       if (olc.isShort(cleanCode)) {
         const refLat = 24.3850;
-        const refLng = 87.2514;
+        const refLng = 87.0872;
         fullCode = olc.recoverNearest(cleanCode, refLat, refLng);
       }
 
@@ -316,7 +304,6 @@ export default function AdminPanel({
       }));
 
       setPlusCodeInput('');
-      Swal.close();
 
       const successHtml = `
         <div class="text-left space-y-2.5 leading-relaxed font-semibold">
@@ -337,7 +324,6 @@ export default function AdminPanel({
         html: successHtml
       });
     } catch (err) {
-      Swal.close();
       Swal.fire(getSwalOptions(
         language === 'hi' ? 'डिकोडिंग में त्रुटि' : 'Decoding Error',
         err.message,
