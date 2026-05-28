@@ -18,18 +18,18 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 const verifiedLocalPlaces = [
-  { name: "बाबा बासुकीनाथ मुख्य मंदिर (Baba Basukinath Temple)", lat: 24.3850, lng: 87.2514, category: "temple", query: "Baba+Basukinath+Dham+Mandir+Jarmundi" },
-  { name: "पर्यटन विहार धर्मशाला (Paryatan Vihar Dharamshala)", lat: 24.3835, lng: 87.2505, category: "hotel", query: "Paryatan+Vihar+Basukinath+Jarmundi" },
-  { name: "शिव कृपा होटल (Hotel Shiv Kripa)", lat: 24.3860, lng: 87.2530, category: "hotel", query: "Hotel+Shiv+Kripa+Basukinath+Jarmundi" },
-  { name: "बासुकीनाथ गेस्ट हाउस (Basukinath Guest House)", lat: 24.3828, lng: 87.2482, category: "hotel", query: "Basukinath+Guest+House+Jarmundi" },
-  { name: "पावन बासुकीनाथ आश्रम (Basukinath Ashram)", lat: 24.3880, lng: 87.2490, category: "ashram", query: "Basukinath+Ashram+Jarmundi" },
-  { name: "सामुदायिक स्वास्थ्य केंद्र, जरमुंडी (Community Health Centre, Jarmundi)", lat: 24.3780, lng: 87.2380, category: "hospital", query: "Community+Health+Centre+Jarmundi" },
-  { name: "निशुल्क स्वास्थ्य शिविर (Free Medical Camp near Temple)", lat: 24.3845, lng: 87.2525, category: "hospital", query: "Baba+Basukinath+Dham+Mandir+Jarmundi" },
-  { name: "भारत पेट्रोलियम जरमुंडी (BPCL Petrol Pump Jarmundi)", lat: 24.3765, lng: 87.2340, category: "petrol_pump", query: "BPCL+Petrol+Pump+Jarmundi" },
-  { name: "बासुकीनाथ बस स्टैंड (Basukinath Bus Stand)", lat: 24.3865, lng: 87.2535, category: "bus_stand", query: "Basukinath+Bus+Stand" },
-  { name: "बासुकीनाथ रेलवे स्टेशन (Basukinath Railway Station)", lat: 24.3800, lng: 87.2440, category: "railway_station", query: "Basukinath+Railway+Station" },
-  { name: "भारतीय स्टेट बैंक एटीएम 🏧 (SBI ATM Basukinath)", lat: 24.3855, lng: 87.2520, category: "atm", query: "SBI+ATM+Basukinath" },
-  { name: "एचडीएफसी बैंक एटीएम 🏧 (HDFC Bank ATM Basukinath)", lat: 24.3840, lng: 87.2508, category: "atm", query: "HDFC+Bank+ATM+Basukinath" }
+  { name: "बाबा बासुकीनाथ मुख्य मंदिर (Baba Basukinath Temple)", lat: 24.3850, lng: 87.0872, category: "temple", query: "Baba+Basukinath+Dham+Mandir+Jarmundi" },
+  { name: "पर्यटन विहार धर्मशाला (Paryatan Vihar Dharamshala)", lat: 24.3835, lng: 87.0863, category: "hotel", query: "Paryatan+Vihar+Basukinath+Jarmundi" },
+  { name: "शिव कृपा होटल (Hotel Shiv Kripa)", lat: 24.3860, lng: 87.0888, category: "hotel", query: "Hotel+Shiv+Kripa+Basukinath+Jarmundi" },
+  { name: "बासुकीनाथ गेस्ट हाउस (Basukinath Guest House)", lat: 24.3828, lng: 87.0840, category: "hotel", query: "Basukinath+Guest+House+Jarmundi" },
+  { name: "पावन बासुकीनाथ आश्रम (Basukinath Ashram)", lat: 24.3880, lng: 87.0848, category: "ashram", query: "Basukinath+Ashram+Jarmundi" },
+  { name: "सामुदायिक स्वास्थ्य केंद्र, जरमुंडी (Community Health Centre, Jarmundi)", lat: 24.3780, lng: 87.0738, category: "hospital", query: "Community+Health+Centre+Jarmundi" },
+  { name: "निशुल्क स्वास्थ्य शिविर (Free Medical Camp near Temple)", lat: 24.3845, lng: 87.0883, category: "hospital", query: "Baba+Basukinath+Dham+Mandir+Jarmundi" },
+  { name: "भारत पेट्रोलियम जरमुंडी (BPCL Petrol Pump Jarmundi)", lat: 24.3765, lng: 87.0698, category: "petrol_pump", query: "BPCL+Petrol+Pump+Jarmundi" },
+  { name: "बासुकीनाथ बस स्टैंड (Basukinath Bus Stand)", lat: 24.3865, lng: 87.0893, category: "bus_stand", query: "Basukinath+Bus+Stand" },
+  { name: "बासुकीनाथ रेलवे स्टेशन (Basukinath Railway Station)", lat: 24.3800, lng: 87.0798, category: "railway_station", query: "Basukinath+Railway+Station" },
+  { name: "भारतीय स्टेट बैंक एटीएम 🏧 (SBI ATM Basukinath)", lat: 24.3855, lng: 87.0878, category: "atm", query: "SBI+ATM+Basukinath" },
+  { name: "एचडीएफसी बैंक एटीएम 🏧 (HDFC Bank ATM Basukinath)", lat: 24.3840, lng: 87.0866, category: "atm", query: "HDFC+Bank+ATM+Basukinath" }
 ];
 
 // --- OFF-LINE KEYWORD SEARCH ENGINE (FALLBACK) ---
@@ -169,7 +169,7 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
     } else {
       reply += `मुख्य मंदिर से इन सुविधाओं की दूरी इस प्रकार है (अपने लाइव स्थान से दूरी देखने के लिए कृपया ब्राउज़र में लोकेशन की अनुमति दें):\n\n`;
       filteredPlaces.forEach(p => {
-        const dist = calculateDistance(24.3850, 87.2514, p.lat, p.lng);
+        const dist = calculateDistance(24.3850, 87.0872, p.lat, p.lng);
         const routeLink = `https://www.google.com/maps/search/?api=1&query=${p.query}`;
         reply += `📍 **${p.name}**:\n   - **मंदिर से दूरी**: लगभग ${dist} किमी\n   - **गूगल मैप्स**: [यहाँ खोजें](${routeLink})\n\n`;
       });
@@ -228,7 +228,7 @@ function getSimulatedResponse(question, data, latitude, longitude, activePlaces)
 
     // Dynamic travel time calculation based on live distance!
     if (latitude && longitude) {
-      const distFromTemple = calculateDistance(latitude, longitude, 24.3850, 87.2514);
+      const distFromTemple = calculateDistance(latitude, longitude, 24.3850, 87.0872);
       
       let travelTimeMins = 0;
       let travelMode = isHindi ? "वाहन (Vehicle)" : "Vehicle";
@@ -556,7 +556,7 @@ export const postMessage = async (req, res) => {
 
       let locationContext = "";
       if (latitude && longitude) {
-        const distFromTemple = calculateDistance(latitude, longitude, 24.3850, 87.2514);
+        const distFromTemple = calculateDistance(latitude, longitude, 24.3850, 87.0872);
         locationContext = `
 Devotee's LIVE GPS COORDINATES are available: Latitude ${latitude}, Longitude ${longitude}.
 The devotee is currently approximately ${distFromTemple} km away from the main Baba Basukinath Temple.
@@ -578,9 +578,9 @@ Crucial Instructions for Pujari Ji:
       } else {
         locationContext = `
 Devotee's live GPS coordinates are NOT available (denied or delayed).
-Here are the standard approximate distances from Baba Basukinath Temple (temple coordinates: 24.3850, 87.2514) to important local static amenities and database-saved temporary camps:
+Here are the standard approximate distances from Baba Basukinath Temple (temple coordinates: 24.3850, 87.0872) to important local static amenities and database-saved temporary camps:
 ${finalPlacesList.map(p => {
-  const distFromTemple = calculateDistance(24.3850, 87.2514, p.lat, p.lng);
+  const distFromTemple = calculateDistance(24.3850, 87.0872, p.lat, p.lng);
   const mapsLink = `https://www.google.com/maps/search/?api=1&query=${p.query}`;
   return `- **${p.name}**: ~${distFromTemple} km from Temple. Maps Search Link: [गूगल मैप्स पर स्थान खोजें](${mapsLink})`;
 }).join('\n')}
