@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Sidebar from '../components/Sidebar';
@@ -18,6 +18,8 @@ export default function AdminDashboardPage() {
     dbConnected,
     handleLogout
   } = useApp();
+
+  const [activeAdminSubTab, setActiveAdminSubTab] = useState('general');
 
   const navigate = useNavigate();
 
@@ -62,6 +64,10 @@ export default function AdminDashboardPage() {
             // i18n states
             language={language}
             onChangeLanguage={setLanguage}
+
+            // Sub Tab states
+            activeAdminSubTab={activeAdminSubTab}
+            setActiveAdminSubTab={setActiveAdminSubTab}
           />
 
           {/* Dynamic Content Panel */}
@@ -92,6 +98,7 @@ export default function AdminDashboardPage() {
               isDarkMode={isDarkMode}
               language={language}
               adminToken={token}
+              activeAdminSubTab={activeAdminSubTab}
             />
           </main>
 

@@ -10,7 +10,8 @@ export default function AdminPanel({
   onDataUpdate, 
   isDarkMode, 
   language, 
-  adminToken 
+  adminToken,
+  activeAdminSubTab = 'general'
 }) {
   // Form states initialized with empty fields to prevent crash, then synced via useEffect
   const [formData, setFormData] = useState({
@@ -704,12 +705,13 @@ export default function AdminPanel({
       )}
 
       {/* Forms Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={activeAdminSubTab === 'general' ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-6"}>
         
         {/* Section 1: Basic Information */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
-          isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
-        }`}>
+        {activeAdminSubTab === 'general' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
+            isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
+          }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500">
             {t('adminSec1', language)}
           </h3>
@@ -778,9 +780,11 @@ export default function AdminPanel({
             />
           </div>
         </div>
+        )}
 
         {/* Section 2: Timings & Aarti */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
+        {activeAdminSubTab === 'general' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
@@ -847,9 +851,11 @@ export default function AdminPanel({
             </button>
           </div>
         </div>
+        )}
 
         {/* Section 3: Rules & Dress Code */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
+        {activeAdminSubTab === 'general' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
@@ -906,9 +912,11 @@ export default function AdminPanel({
             </div>
           </div>
         </div>
+        )}
 
         {/* Section 4: Festivals & Events */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
+        {activeAdminSubTab === 'general' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
@@ -987,9 +995,11 @@ export default function AdminPanel({
             </button>
           </div>
         </div>
+        )}
 
         {/* Section 5: Donations & Bank Details */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+        {activeAdminSubTab === 'general' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500">
@@ -1032,9 +1042,11 @@ export default function AdminPanel({
             </div>
           </div>
         </div>
+        )}
 
         {/* Section 6: Custom Dynamic Sections */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+        {activeAdminSubTab === 'custom' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
@@ -1115,9 +1127,11 @@ export default function AdminPanel({
             </button>
           </div>
         </div>
+        )}
 
         {/* Section 7: Temporary Camps & Shivirs */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+        {activeAdminSubTab === 'camps' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
@@ -1313,9 +1327,11 @@ export default function AdminPanel({
             </button>
           </div>
         </div>
+        )}
 
         {/* Section 8: Emergency Helplines & Assistance */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+        {activeAdminSubTab === 'emergency' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500 flex items-center justify-between">
@@ -1422,9 +1438,11 @@ export default function AdminPanel({
             </button>
           </div>
         </div>
+        )}
 
         {/* Section 9: Disabled & Elderly Assistance */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+        {activeAdminSubTab === 'disabled' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <h3 className="text-base font-extrabold font-spiritual border-b border-stone-200 dark:border-stone-850 pb-2 text-saffron-500">
@@ -1521,9 +1539,11 @@ export default function AdminPanel({
             </div>
           </div>
         </div>
+        )}
 
         {/* Section 10: Live Crowd & Queue Tracker */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
+        {activeAdminSubTab === 'crowd' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-4 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <div className="flex items-center gap-2 border-b border-stone-200 dark:border-stone-850 pb-2">
@@ -1733,9 +1753,11 @@ export default function AdminPanel({
             </div>
           </div>
         </div>
+        )}
 
         {/* Section 11: Deployed QR Code Standee & Print Placard Generator */}
-        <div className={`p-6 rounded-[28px] shadow-sm border space-y-6 md:col-span-2 ${
+        {activeAdminSubTab === 'qr' && (
+          <div className={`p-6 rounded-[28px] shadow-sm border space-y-6 md:col-span-2 ${
           isDarkMode ? 'glass-card-dark text-white' : 'glass-card text-stone-800'
         }`}>
           <div className="flex items-center gap-2 border-b border-stone-200 dark:border-stone-850 pb-2">
@@ -1903,6 +1925,7 @@ export default function AdminPanel({
 
           </div>
         </div>
+        )}
 
       </div>
     </div>

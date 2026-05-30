@@ -10,7 +10,13 @@ import {
   Trash2, 
   LogOut, 
   Plus, 
-  Globe 
+  Globe,
+  Info,
+  FileText,
+  PhoneCall,
+  Accessibility,
+  BarChart2,
+  Printer
 } from 'lucide-react';
 import { t } from '../utils/translations';
 import shivlingImg from '../assets/shivling.png';
@@ -34,7 +40,11 @@ export default function Sidebar({
   
   // i18n states
   language,
-  onChangeLanguage
+  onChangeLanguage,
+
+  // Admin sub-tabs states
+  activeAdminSubTab = 'general',
+  setActiveAdminSubTab
 }) {
   return (
     <aside className={`w-full lg:w-80 shrink-0 p-6 flex flex-col justify-between rounded-[32px] border shadow-xl transition-all duration-300 ${
@@ -160,6 +170,80 @@ export default function Sidebar({
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Admin Panel Sub-navigation Menus */}
+        {user && user.role === 'admin' && activeTab === 'admin' && (
+          <div className="flex-1 flex flex-col min-h-0 space-y-2 pt-2 border-t border-orange-100/50 dark:border-stone-850">
+            <div className="px-1 mb-1 shrink-0">
+              <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 dark:text-stone-500">
+                {language === 'hi' ? 'डेटा संपादक मेनू' : 'ADMIN CONTROL MENUS'}
+              </h3>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-stone-850">
+              {[
+                {
+                  id: 'general',
+                  labelHi: ' मंदिर सामान्य विवरण',
+                  labelEn: ' Temple Info (General)',
+                  icon: <Info className="w-4 h-4 shrink-0" />
+                },
+                {
+                  id: 'custom',
+                  labelHi: ' कस्टम अनुभाग',
+                  labelEn: ' Custom Sections',
+                  icon: <FileText className="w-4 h-4 shrink-0" />
+                },
+                {
+                  id: 'camps',
+                  labelHi: ' अस्थायी शिविर प्रबंधन',
+                  labelEn: ' Temporary Camps',
+                  icon: <MapPin className="w-4 h-4 shrink-0" />
+                },
+                {
+                  id: 'emergency',
+                  labelHi: ' आपातकालीन हेल्पलाइन',
+                  labelEn: ' Emergency Contacts',
+                  icon: <PhoneCall className="w-4 h-4 shrink-0" />
+                },
+                {
+                  id: 'disabled',
+                  labelHi: ' वृद्ध एवं दिव्यांग सहायता',
+                  labelEn: ' Special Assistance',
+                  icon: <Accessibility className="w-4 h-4 shrink-0" />
+                },
+                {
+                  id: 'crowd',
+                  labelHi: ' लाइव भीड़ ट्रैकर',
+                  labelEn: ' Live Crowd Tracker',
+                  icon: <BarChart2 className="w-4 h-4 shrink-0" />
+                },
+                {
+                  id: 'qr',
+                  labelHi: ' QR कोड और Standee',
+                  labelEn: ' QR & Promo Standee',
+                  icon: <Printer className="w-4 h-4 shrink-0" />
+                }
+              ].map((subTab) => {
+                const isSelected = activeAdminSubTab === subTab.id;
+                return (
+                  <button
+                    key={subTab.id}
+                    onClick={() => setActiveAdminSubTab(subTab.id)}
+                    className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-[0.98] border ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-saffron-500 to-amber-500 text-white border-transparent shadow-sm'
+                        : 'text-stone-600 dark:text-stone-300 bg-transparent border-transparent hover:bg-orange-50/50 dark:hover:bg-stone-900/50'
+                    }`}
+                  >
+                    {subTab.icon}
+                    <span className="truncate">{language === 'hi' ? subTab.labelHi : subTab.labelEn}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
